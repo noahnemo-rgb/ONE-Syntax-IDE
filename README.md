@@ -81,7 +81,8 @@ Open the file drawer → **Plan & usage** to see quotas and toggle Free/Pro unti
 | Cloud sync | login required | login + Pro |
 | Semantic snippet search | — | ✓ |
 
-See `docs/LAPTOP_CHECKLIST.md` for EAS build steps on your laptop.
+**New to standing this up?** Follow the step-by-step punch list: **[`docs/STANDUP.md`](docs/STANDUP.md)**.  
+Also see `docs/LAPTOP_CHECKLIST.md` and `docs/EAS.md` for EAS builds.
 
 ## Architecture
 

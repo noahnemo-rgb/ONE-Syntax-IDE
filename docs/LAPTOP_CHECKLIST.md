@@ -1,6 +1,8 @@
 # Laptop checklist — after merging latest `main`
 
-Use this when you return to your Mac/PC. Your iPhone can keep doing CDD chat with Grok; run these steps on the laptop.
+> **Prefer the full novice punch list:** [`STANDUP.md`](./STANDUP.md) (Parts A→E with checkboxes and expected results).
+
+Use this shorter list when you return to your Mac/PC. Your iPhone can keep doing CDD chat with Grok; run these steps on the laptop.
 
 ## 1. Pull latest code
 
