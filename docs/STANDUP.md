@@ -224,7 +224,10 @@ npx eas-cli secret:create --name EXPO_PUBLIC_BACKEND_URL --value https://YOUR-AP
 
 ### C4. Build a preview app
 
-**Android (easiest):**
+> **iPhone walkthrough:** **[FIRST_EAS_IOS.md](./FIRST_EAS_IOS.md)**  
+> **Android walkthrough:** **[FIRST_EAS_ANDROID.md](./FIRST_EAS_ANDROID.md)** (when on `main`)
+
+**Android:**
 
 ```bash
 cd /path/to/drag-code-app/frontend

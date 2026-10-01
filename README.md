@@ -82,6 +82,7 @@ Open the file drawer → **Plan & usage** to see quotas and toggle Free/Pro unti
 | Semantic snippet search | — | ✓ |
 
 **New to standing this up?** Follow the step-by-step punch list: **[`docs/STANDUP.md`](docs/STANDUP.md)**.  
+**First iPhone install (no Expo Go)?** **[`docs/FIRST_EAS_IOS.md`](docs/FIRST_EAS_IOS.md)**.  
 Also see `docs/LAPTOP_CHECKLIST.md` and `docs/EAS.md` for EAS builds.
 
 ## Architecture
