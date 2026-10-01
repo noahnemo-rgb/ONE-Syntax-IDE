@@ -224,6 +224,8 @@ npx eas-cli secret:create --name EXPO_PUBLIC_BACKEND_URL --value https://YOUR-AP
 
 ### C4. Build a preview app
 
+> Step-by-step Android-first walkthrough: **[FIRST_EAS_ANDROID.md](./FIRST_EAS_ANDROID.md)**
+
 **Android (easiest):**
 
 ```bash
