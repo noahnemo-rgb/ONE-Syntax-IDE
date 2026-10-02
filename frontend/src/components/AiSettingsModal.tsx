@@ -51,12 +51,10 @@ export function AiSettingsModal({
         setProviderLabel(info.label);
         setProviderDesc(info.description);
         setProviderReady(info.configured);
-        if (!isWeb) {
-          const [savedKey, savedModel] = await Promise.all([openRouterKey.get(), openRouterModel.get()]);
-          if (savedKey) setApiKey(savedKey);
-          setKeyLoaded(!!savedKey);
-          setModel(savedModel);
-        }
+        const [savedKey, savedModel] = await Promise.all([openRouterKey.get(), openRouterModel.get()]);
+        if (savedKey) setApiKey(savedKey);
+        setKeyLoaded(!!savedKey);
+        setModel(savedModel);
       } finally {
         setLoading(false);
       }
@@ -146,8 +144,8 @@ export function AiSettingsModal({
                 <>
                   <Text style={styles.sectionLabel}>Web — Puter sign-in</Text>
                   <Text style={styles.help}>
-                    AI on web uses Puter.js. You may be asked to sign in to your Puter account the first time you send a
-                    message. Usage is billed to your Puter account, not the app developer.
+                    Puter stays first. You may be asked to sign in the first time you send a message. Usage is billed to
+                    your Puter account, not the app developer.
                   </Text>
                   <Pressable
                     style={[styles.primaryBtn, busy && { opacity: 0.6 }]}
@@ -161,14 +159,16 @@ export function AiSettingsModal({
                     <Text style={styles.linkText}>Open puter.com</Text>
                   </Pressable>
                 </>
-              ) : (
-                <>
-                  <Text style={styles.sectionLabel}>Mobile — your OpenRouter key</Text>
-                  <Text style={styles.help}>
-                    Your API key is stored in the device keychain and sent only to OpenRouter from this app — never to
-                    our backend.
-                  </Text>
-                  <Text style={styles.fieldLabel}>OpenRouter API key</Text>
+              ) : null}
+              <Text style={styles.sectionLabel}>
+                {isWeb ? "Optional key for Space Bunny Alpha" : "Mobile — your OpenRouter key"}
+              </Text>
+              <Text style={styles.help}>
+                {isWeb
+                  ? "A key saved in this browser tries Space Bunny Alpha, then the model below, when Puter cannot answer. The key is not sent to the Syntax server."
+                  : "The key stays in the device keychain. Space Bunny Alpha runs first, then the model below. It is sent only to OpenRouter."}
+              </Text>
+              <Text style={styles.fieldLabel}>OpenRouter API key</Text>
                   <TextInput
                     value={apiKey}
                     onChangeText={setApiKey}
@@ -204,11 +204,9 @@ export function AiSettingsModal({
                       <Text style={[styles.linkText, { color: COLORS.error }]}>Remove saved key</Text>
                     </Pressable>
                   ) : null}
-                  <Pressable onPress={() => Linking.openURL("https://openrouter.ai/keys")} style={styles.linkBtn}>
-                    <Text style={styles.linkText}>Get a key at openrouter.ai/keys</Text>
-                  </Pressable>
-                </>
-              )}
+              <Pressable onPress={() => Linking.openURL("https://openrouter.ai/keys")} style={styles.linkBtn}>
+                <Text style={styles.linkText}>Get a key at openrouter.ai/keys</Text>
+              </Pressable>
 
               {status ? (
                 <Text style={[styles.status, { color: status.ok ? COLORS.success : COLORS.error }]}>{status.text}</Text>
