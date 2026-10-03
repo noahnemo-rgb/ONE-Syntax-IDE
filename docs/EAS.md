@@ -1,5 +1,7 @@
 # EAS Build & Update (Expo)
 
+> **First time building for a phone?** Start here: **[FIRST_EAS_ANDROID.md](./FIRST_EAS_ANDROID.md)** (Android APK punch list).
+
 This app is configured for **EAS Build** (installable binaries) and **EAS Update** (OTA JS/asset updates).
 
 > **Important:** EAS Update does **not** apply to Expo Go. You need a custom build (development, preview, or production) that includes `expo-updates`. Use Expo Go only for day-to-day coding; use EAS when you want teammates or testers to get updates without rebuilding native code every time.
