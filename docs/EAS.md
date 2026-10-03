@@ -3,6 +3,7 @@
 > **First phone install?**  
 > - iPhone: **[FIRST_EAS_IOS.md](./FIRST_EAS_IOS.md)**  
 > - Android: **[FIRST_EAS_ANDROID.md](./FIRST_EAS_ANDROID.md)** (when available on `main`)
+> **First time building for a phone?** Start here: **[FIRST_EAS_ANDROID.md](./FIRST_EAS_ANDROID.md)** (Android APK punch list).
 
 This app is configured for **EAS Build** (installable binaries) and **EAS Update** (OTA JS/asset updates).
 

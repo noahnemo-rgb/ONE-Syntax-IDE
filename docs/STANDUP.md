@@ -228,6 +228,9 @@ npx eas-cli secret:create --name EXPO_PUBLIC_BACKEND_URL --value https://YOUR-AP
 > **Android walkthrough:** **[FIRST_EAS_ANDROID.md](./FIRST_EAS_ANDROID.md)** (when on `main`)
 
 **Android:**
+> Step-by-step Android-first walkthrough: **[FIRST_EAS_ANDROID.md](./FIRST_EAS_ANDROID.md)**
+
+**Android (easiest):**
 
 ```bash
 cd /path/to/drag-code-app/frontend
