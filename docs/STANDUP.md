@@ -224,6 +224,10 @@ npx eas-cli secret:create --name EXPO_PUBLIC_BACKEND_URL --value https://YOUR-AP
 
 ### C4. Build a preview app
 
+> **iPhone walkthrough:** **[FIRST_EAS_IOS.md](./FIRST_EAS_IOS.md)**  
+> **Android walkthrough:** **[FIRST_EAS_ANDROID.md](./FIRST_EAS_ANDROID.md)** (when on `main`)
+
+**Android:**
 > Step-by-step Android-first walkthrough: **[FIRST_EAS_ANDROID.md](./FIRST_EAS_ANDROID.md)**
 
 **Android (easiest):**
