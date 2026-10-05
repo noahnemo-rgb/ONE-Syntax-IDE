@@ -1,11 +1,7 @@
-import {
-  buildUserText,
-  formatAiError,
-  PUTER_DEFAULT_MODEL,
-  SYSTEM_PROMPT,
-  type AiProviderInfo,
-  type StreamAiChatParams,
-} from "./ai-chat-shared";
+import { formatAiError, formatCodeContext } from "ai-buffer";
+import { openRouterKey, openRouterModel } from "./ai-keys";
+import { SYSTEM_PROMPT, type AiProviderInfo, type StreamAiChatParams } from "./ai-chat-shared";
+import { createSyntaxRouter } from "./syntax-router.js";
 
 type PuterModule = typeof import("@heyputer/puter.js");
 
@@ -14,37 +10,26 @@ async function loadPuter(): Promise<PuterModule["puter"]> {
   return mod.puter;
 }
 
-function buildPuterPrompt(history: StreamAiChatParams["history"], userText: string): string {
-  const lines: string[] = [`System: ${SYSTEM_PROMPT}`];
-  // Puter single-prompt API — include recent turns as plain text.
-  const recent = history.slice(-10);
-  if (recent.length) {
-    lines.push("Previous conversation:");
-    for (const turn of recent) {
-      lines.push(`${turn.role === "user" ? "User" : "Assistant"}: ${turn.content}`);
-    }
-    lines.push("");
-  }
-  lines.push(`User: ${userText}`);
-  return lines.join("\n");
-}
-
 export async function getAiProviderInfo(): Promise<AiProviderInfo> {
+  const key = await openRouterKey.get();
+  const keyed = Boolean(key?.trim());
   try {
     const puter = await loadPuter();
-    const signedIn = puter.auth.isSignedIn();
+    const signedIn = Boolean(puter.auth?.isSignedIn?.());
     return {
-      label: "Puter (your account)",
+      label: "Puter",
       description: signedIn
-        ? "Signed in to Puter. AI usage is billed to your Puter account, not the app developer."
-        : "Sign in to Puter when prompted. AI usage is billed to your Puter account — no developer API key required.",
-      configured: signedIn,
+        ? keyed
+          ? "Signed in to Puter. If Puter cannot answer, this browser tries Space Bunny Alpha, then your OpenRouter model."
+          : "Signed in to Puter. AI usage is billed to your Puter account, not the app developer."
+        : "Sign in to Puter when prompted. An optional OpenRouter key on this device tries Space Bunny Alpha after Puter.",
+      configured: signedIn || keyed,
     };
   } catch {
     return {
-      label: "Puter (your account)",
-      description: "Sign in to Puter when prompted. AI usage is billed to your Puter account.",
-      configured: false,
+      label: "Puter",
+      description: "Sign in to Puter when prompted. An optional OpenRouter key tries Space Bunny Alpha after Puter.",
+      configured: keyed,
     };
   }
 }
@@ -55,30 +40,24 @@ export async function signInAiProvider(): Promise<void> {
 }
 
 export async function streamAiChat(params: StreamAiChatParams): Promise<string> {
-  const puter = await loadPuter();
-  const userText = buildUserText(params.message, params.context);
-  const prompt = buildPuterPrompt(params.history, userText);
-  let full = "";
+  const apiKey = await openRouterKey.get();
+  const model = await openRouterModel.get();
+  const router = createSyntaxRouter({
+    platform: "web",
+    apiKey: apiKey ?? "",
+    model,
+    loadPuter,
+  });
   try {
-    const stream = await puter.ai.chat(prompt, {
-      model: PUTER_DEFAULT_MODEL,
-      stream: true,
+    return await router.streamChat({
+      message: params.message,
+      history: params.history,
+      systemPrompt: SYSTEM_PROMPT,
+      context: params.context?.code
+        ? formatCodeContext({ code: params.context.code, language: params.context.language })
+        : undefined,
+      onChunk: params.onChunk,
     });
-    for await (const part of stream as AsyncIterable<{ text?: string; message?: { content?: string } }>) {
-      const chunk = part?.text ?? part?.message?.content ?? "";
-      if (chunk) {
-        full += chunk;
-        params.onChunk(chunk);
-      }
-    }
-    if (!full) {
-      // Non-streaming fallback shape
-      const response = await puter.ai.chat(prompt, { model: PUTER_DEFAULT_MODEL });
-      const content = (response as { message?: { content?: string } })?.message?.content ?? String(response);
-      full = content;
-      if (content) params.onChunk(content);
-    }
-    return full;
   } catch (e) {
     throw new Error(formatAiError(e));
   }

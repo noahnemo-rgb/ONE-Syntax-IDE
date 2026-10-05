@@ -10,6 +10,23 @@ import httpx
 logger = logging.getLogger(__name__)
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+SPACE_BUNNY_MODEL = "stealth/space-bunny-alpha"
+FAILOVER_STATUS = {401, 402, 429, 500, 502, 503, 504}
+
+
+class OpenRouterStatus(RuntimeError):
+    def __init__(self, status: int, body: str):
+        super().__init__(f"OpenRouter HTTP {status}: {body[:500]}")
+        self.status = status
+
+
+def model_attempts(model: str) -> List[tuple]:
+    """Space Bunny Alpha first, then the named OpenRouter model. Same key for both."""
+    named = (model or "openai/gpt-4o-mini").strip() or "openai/gpt-4o-mini"
+    plan: List[tuple] = [(SPACE_BUNNY_MODEL, {"reasoning": {"effort": "medium"}})]
+    if named != SPACE_BUNNY_MODEL:
+        plan.append((named, None))
+    return plan
 
 
 async def stream_openrouter(
@@ -20,6 +37,7 @@ async def stream_openrouter(
     site_url: str = "https://syntax.ide",
     app_name: str = "Syntax Mobile IDE",
     timeout_sec: float = 120.0,
+    extra: Optional[Dict] = None,
 ) -> AsyncIterator[str]:
     """
     Yield plain-text content deltas from OpenRouter's OpenAI-compatible SSE stream.
@@ -35,12 +53,14 @@ async def stream_openrouter(
         "messages": messages,
         "stream": True,
     }
+    if extra:
+        payload.update(extra)
 
     async with httpx.AsyncClient(timeout=timeout_sec) as client:
         async with client.stream("POST", OPENROUTER_URL, headers=headers, json=payload) as resp:
             if resp.status_code >= 400:
                 body = (await resp.aread()).decode("utf-8", errors="replace")
-                raise RuntimeError(f"OpenRouter HTTP {resp.status_code}: {body[:500]}")
+                raise OpenRouterStatus(resp.status_code, body)
 
             async for line in resp.aiter_lines():
                 if not line:

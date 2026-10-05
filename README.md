@@ -64,8 +64,8 @@ Open in Expo Go, an emulator, or press `w` for web. Cloud sync and snippet publi
 
 | Platform | Setup |
 |----------|--------|
-| **Web** | Open the AI screen and send a message — sign in to Puter when prompted. Usage is billed to the user's Puter account. |
-| **iOS / Android** | Tap the gear icon on the AI screen → paste an [OpenRouter](https://openrouter.ai/keys) API key. The key stays on the device and is sent only to OpenRouter. |
+| **Web** | Open the AI screen and send a message — sign in to Puter when prompted. Usage is billed to the user's Puter account. An optional OpenRouter key in settings tries Space Bunny Alpha, then the saved model. |
+| **iOS / Android** | Tap the gear icon on the AI screen → paste an [OpenRouter](https://openrouter.ai/keys) API key. Space Bunny Alpha runs first, then the saved model. The key stays on the device and is sent only to OpenRouter. |
 
 Optional: configure `OPENROUTER_API_KEY` on the server for authenticated `/api/chat/stream`.
 
@@ -93,9 +93,9 @@ Also see `docs/LAPTOP_CHECKLIST.md` and `docs/EAS.md` for EAS builds.
 | App | Expo / React Native / expo-router |
 | API | FastAPI + Motor (MongoDB) |
 | Auth | Email/password accounts, bcrypt hashes, JWT sessions |
-| AI (web) | [Puter.js](https://docs.puter.com/) — user-pays, no server key |
-| AI (mobile) | OpenRouter BYOK from device keychain |
-| AI (optional server) | OpenRouter via `/api/chat/stream` when `OPENROUTER_API_KEY` is set |
+| AI (web) | [Puter.js](https://docs.puter.com/) first, then Space Bunny Alpha when a device key exists |
+| AI (mobile) | Space Bunny Alpha, then OpenRouter BYOK from the device keychain |
+| AI (optional server) | Space Bunny Alpha, then `OPENROUTER_MODEL`, via `/api/chat/stream` when `OPENROUTER_API_KEY` is set |
 | Runner | Dedicated `runner_app` (Docker `--network=none`) or local process sandbox; per-tier daily run limits |
 
 Projects/files sync **local** (AsyncStorage) or **cloud** (MongoDB, scoped by authenticated `owner_id`). Chat history for client AI is local; server chat (when used) is JWT-scoped.

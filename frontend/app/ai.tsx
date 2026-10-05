@@ -170,9 +170,9 @@ export default function AiScreen() {
 
   const providerHint =
     Platform.OS === "web"
-      ? "Powered by Puter — sign in when prompted; usage is on your Puter account."
+      ? "Puter runs first. A key in settings tries Space Bunny Alpha, then your OpenRouter model."
       : providerReady
-        ? providerLabel
+        ? "Space Bunny Alpha, then your OpenRouter model. The key stays on this device."
         : "Add your OpenRouter key in settings to enable AI.";
 
   return (

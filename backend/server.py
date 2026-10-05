@@ -23,7 +23,7 @@ from auth_utils import (
     hash_password,
     verify_password,
 )
-from openrouter_chat import build_messages, stream_openrouter
+from openrouter_chat import FAILOVER_STATUS, OpenRouterStatus, build_messages, model_attempts, stream_openrouter
 from sandbox_run import run_isolated
 from snippet_search import (
     build_snippet_filter,
@@ -272,7 +272,7 @@ async def root():
         "chat_provider": "openrouter",
         "chat_model": OPENROUTER_MODEL,
         "chat_configured": bool(OPENROUTER_API_KEY),
-        "ai": "client-side (Puter on web, OpenRouter BYOK on mobile) + optional server OpenRouter",
+        "ai": "client-side (Puter first on web, Space Bunny Alpha then OpenRouter when a key is saved) + optional server Space Bunny Alpha",
         "auth_required": REQUIRE_AUTH,
         "runner_url": RUNNER_URL or None,
         "tiers": {
@@ -639,16 +639,26 @@ async def chat_stream(payload: ChatRequest, user: AuthUser = Depends(require_use
 
     async def event_gen():
         full_parts: List[str] = []
+        attempts = model_attempts(OPENROUTER_MODEL)
         try:
-            async for delta in stream_openrouter(
-                api_key=OPENROUTER_API_KEY,
-                model=OPENROUTER_MODEL,
-                messages=messages,
-                site_url=OPENROUTER_SITE_URL,
-                app_name=OPENROUTER_APP_NAME,
-            ):
-                full_parts.append(delta)
-                yield delta
+            for index, (model, extra) in enumerate(attempts):
+                try:
+                    async for delta in stream_openrouter(
+                        api_key=OPENROUTER_API_KEY,
+                        model=model,
+                        messages=messages,
+                        site_url=OPENROUTER_SITE_URL,
+                        app_name=OPENROUTER_APP_NAME,
+                        extra=extra,
+                    ):
+                        full_parts.append(delta)
+                        yield delta
+                    break
+                except OpenRouterStatus as status_error:
+                    more = index < len(attempts) - 1 and not full_parts and status_error.status in FAILOVER_STATUS
+                    if more:
+                        continue
+                    raise
 
             await db.chat_messages.insert_one(
                 {
