@@ -19,9 +19,9 @@ import {
   githubPat,
   loadGitHubConfig,
   loadWebhookConfig,
+  hideSecret,
   pushToGitHub,
   pushToWebhook,
-  redact,
   saveGitHubConfig,
   saveWebhookConfig,
   shareViaNative,
@@ -48,6 +48,7 @@ export function PushModal({
 
   // GitHub state
   const [pat, setPat] = useState<string>("");
+  const [patHint, setPatHint] = useState<string>("");
   const [patLoaded, setPatLoaded] = useState<boolean>(false);
   const [gh, setGh] = useState<GitHubConfig>({ owner: "", repo: "", branch: "main", path: "" });
   const [ghMsg, setGhMsg] = useState<string>(`Update ${filename} from Syntax`);
@@ -55,6 +56,7 @@ export function PushModal({
   // Webhook state
   const [wh, setWh] = useState<WebhookConfig>({ url: "" });
   const [whToken, setWhToken] = useState<string>("");
+  const [whHint, setWhHint] = useState<string>("");
   const [whTokenLoaded, setWhTokenLoaded] = useState<boolean>(false);
 
   const [busy, setBusy] = useState<boolean>(false);
@@ -63,18 +65,20 @@ export function PushModal({
   useEffect(() => {
     if (!visible) return;
     (async () => {
-      const [savedPat, ghCfg, whCfg, savedWhToken] = await Promise.all([
-        githubPat.get(),
+      const [patHintValue, ghCfg, whCfg, whHintValue] = await Promise.all([
+        githubPat.hint(),
         loadGitHubConfig(),
         loadWebhookConfig(),
-        webhookToken.get(),
+        webhookToken.hint(),
       ]);
-      if (savedPat) setPat(savedPat);
-      setPatLoaded(!!savedPat);
+      setPat("");
+      setPatHint(patHintValue);
+      setPatLoaded(Boolean(patHintValue));
       if (ghCfg) setGh(ghCfg);
       if (whCfg) setWh(whCfg);
-      if (savedWhToken) setWhToken(savedWhToken);
-      setWhTokenLoaded(!!savedWhToken);
+      setWhToken("");
+      setWhHint(whHintValue);
+      setWhTokenLoaded(Boolean(whHintValue));
       setStatus(null);
       setGhMsg(`Update ${filename} from Syntax`);
     })();
@@ -82,16 +86,21 @@ export function PushModal({
 
   const doGitHub = async () => {
     setStatus(null);
-    if (!pat.trim()) return setStatus({ ok: false, text: "Enter a GitHub Personal Access Token." });
     if (!gh.owner.trim() || !gh.repo.trim() || !gh.branch.trim() || !gh.path.trim()) {
       return setStatus({ ok: false, text: "Owner, repo, branch, and path are all required." });
     }
     setBusy(true);
+    const typed = pat.trim();
+    const token = typed || (await githubPat.get()) || "";
+    if (!token) {
+      setBusy(false);
+      return setStatus({ ok: false, text: "Enter a GitHub Personal Access Token." });
+    }
     try {
-      await githubPat.set(pat.trim());
+      if (typed) await githubPat.set(typed);
       await saveGitHubConfig(gh);
       const res = await pushToGitHub({
-        pat: pat.trim(),
+        pat: token,
         owner: gh.owner.trim(),
         repo: gh.repo.trim(),
         branch: gh.branch.trim(),
@@ -99,10 +108,14 @@ export function PushModal({
         message: ghMsg.trim() || `Update ${filename}`,
         content,
       });
+      setPat("");
+      const hint = await githubPat.hint();
+      setPatHint(hint);
+      setPatLoaded(Boolean(hint));
       setStatus({ ok: true, text: `Pushed. commit ${res.commitSha.slice(0, 7)}` });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      setStatus({ ok: false, text: msg.replace(pat, redact(pat)) });
+      setStatus({ ok: false, text: hideSecret(msg, token) });
     } finally {
       setBusy(false);
     }
@@ -114,18 +127,25 @@ export function PushModal({
     setBusy(true);
     try {
       await saveWebhookConfig(wh);
-      if (whToken.trim()) await webhookToken.set(whToken.trim());
-      else await webhookToken.clear();
+      const typedToken = whToken.trim();
+      if (typedToken) await webhookToken.set(typedToken);
+      const token = typedToken || (await webhookToken.get()) || "";
       const res = await pushToWebhook({
         url: wh.url.trim(),
-        token: whToken.trim() || undefined,
+        token: token || undefined,
         filename,
         language,
         content,
       });
+      setWhToken("");
+      const hint = await webhookToken.hint();
+      setWhHint(hint);
+      setWhTokenLoaded(Boolean(hint));
       setStatus({ ok: true, text: `Webhook accepted (HTTP ${res.status}).` });
     } catch (e) {
-      setStatus({ ok: false, text: e instanceof Error ? e.message : String(e) });
+      const typedToken = whToken.trim();
+      const token = typedToken || (await webhookToken.get()) || "";
+      setStatus({ ok: false, text: hideSecret(e instanceof Error ? e.message : String(e), token) });
     } finally {
       setBusy(false);
     }
@@ -191,9 +211,14 @@ export function PushModal({
                     autoCorrect={false}
                     testID="push-pat"
                   />
-                  <Text style={s.hint}>
-                    Stored in {Platform.OS === "web" ? "browser storage" : "the OS Keychain"}. Never sent to our servers.
-                  </Text>
+                  {patHint ? (
+                    <Text style={s.hint} testID="push-pat-hint">
+                      {patHint}
+                    </Text>
+                  ) : null}
+                  {Platform.OS === "web" ? null : (
+                    <Text style={s.hint}>Stored in the OS Keychain. Never sent to our servers.</Text>
+                  )}
                 </Field>
                 <Row>
                   <Field label="Owner" flex={1}>
@@ -222,6 +247,7 @@ export function PushModal({
                     onPress={async () => {
                       await githubPat.clear();
                       setPat("");
+                      setPatHint("");
                       setPatLoaded(false);
                       setStatus({ ok: true, text: "GitHub token cleared from this device." });
                     }}
@@ -258,6 +284,20 @@ export function PushModal({
                     autoCorrect={false}
                     testID="push-webhook-token"
                   />
+                  {whHint ? (
+                    <Pressable
+                      onLongPress={async () => {
+                        await webhookToken.clear();
+                        setWhToken("");
+                        setWhHint("");
+                        setWhTokenLoaded(false);
+                      }}
+                    >
+                      <Text style={s.hint} testID="push-webhook-hint">
+                        {whHint}
+                      </Text>
+                    </Pressable>
+                  ) : null}
                 </Field>
                 <Text style={s.hint}>Body: {"{ filename, language, content, timestamp }"}</Text>
                 <Pressable onPress={doWebhook} disabled={busy} style={[s.primary, busy && { opacity: 0.5 }]} testID="push-webhook-btn">

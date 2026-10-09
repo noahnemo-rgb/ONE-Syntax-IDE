@@ -7,6 +7,8 @@ from typing import AsyncIterator, Dict, List, Optional
 
 import httpx
 
+from redact_provider import redact_provider_text
+
 logger = logging.getLogger(__name__)
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -16,7 +18,7 @@ FAILOVER_STATUS = {401, 402, 429, 500, 502, 503, 504}
 
 class OpenRouterStatus(RuntimeError):
     def __init__(self, status: int, body: str):
-        super().__init__(f"OpenRouter HTTP {status}: {body[:500]}")
+        super().__init__(f"OpenRouter HTTP {status}: {redact_provider_text(body)}")
         self.status = status
 
 
@@ -82,7 +84,7 @@ async def stream_openrouter(
                 err = chunk.get("error")
                 if err:
                     msg = err.get("message") if isinstance(err, dict) else str(err)
-                    raise RuntimeError(f"OpenRouter stream error: {msg}")
+                    raise RuntimeError(f"OpenRouter stream error: {redact_provider_text(str(msg or ''))}")
 
                 choices = chunk.get("choices") or []
                 if not choices:

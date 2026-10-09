@@ -1,5 +1,5 @@
-import { formatAiError, formatCodeContext } from "ai-buffer";
-import { openRouterKey, openRouterModel } from "./ai-keys";
+import { DASHBOARD_LABELS, formatAiError, formatCodeContext } from "ai-buffer";
+import { loadChatRouterOptions, loadProviderSummary } from "./ai-keys";
 import { SYSTEM_PROMPT, type AiProviderInfo, type StreamAiChatParams } from "./ai-chat-shared";
 import { createSyntaxRouter } from "./syntax-router.js";
 
@@ -10,28 +10,17 @@ async function loadPuter(): Promise<PuterModule["puter"]> {
   return mod.puter;
 }
 
-export async function getAiProviderInfo(): Promise<AiProviderInfo> {
-  const key = await openRouterKey.get();
-  const keyed = Boolean(key?.trim());
+export async function isPuterSignedIn(): Promise<boolean> {
   try {
     const puter = await loadPuter();
-    const signedIn = Boolean(puter.auth?.isSignedIn?.());
-    return {
-      label: "Puter",
-      description: signedIn
-        ? keyed
-          ? "Signed in to Puter. If Puter cannot answer, this browser tries Space Bunny Alpha, then your OpenRouter model."
-          : "Signed in to Puter. AI usage is billed to your Puter account, not the app developer."
-        : "Sign in to Puter when prompted. An optional OpenRouter key on this device tries Space Bunny Alpha after Puter.",
-      configured: signedIn || keyed,
-    };
+    return Boolean(puter.auth?.isSignedIn?.());
   } catch {
-    return {
-      label: "Puter",
-      description: "Sign in to Puter when prompted. An optional OpenRouter key tries Space Bunny Alpha after Puter.",
-      configured: keyed,
-    };
+    return false;
   }
+}
+
+export async function getAiProviderInfo(): Promise<AiProviderInfo> {
+  return loadProviderSummary(await isPuterSignedIn());
 }
 
 export async function signInAiProvider(): Promise<void> {
@@ -40,14 +29,11 @@ export async function signInAiProvider(): Promise<void> {
 }
 
 export async function streamAiChat(params: StreamAiChatParams): Promise<string> {
-  const apiKey = await openRouterKey.get();
-  const model = await openRouterModel.get();
-  const router = createSyntaxRouter({
-    platform: "web",
-    apiKey: apiKey ?? "",
-    model,
-    loadPuter,
-  });
+  const options = await loadChatRouterOptions("web");
+  const router = createSyntaxRouter({ ...options, loadPuter });
+  if (!router) {
+    throw new Error(DASHBOARD_LABELS.notConfigured);
+  }
   try {
     return await router.streamChat({
       message: params.message,

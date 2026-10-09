@@ -42,4 +42,4 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Run pytest
-        run: pytest tests/test_local_api.py -v --tb=short
+        run: pytest tests/test_openrouter_route.py tests/test_local_api.py -v --tb=short
