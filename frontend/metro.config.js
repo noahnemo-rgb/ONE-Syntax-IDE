@@ -22,4 +22,15 @@ config.cacheStores = [
 // Reduce the number of workers to decrease resource usage
 config.maxWorkers = 2;
 
+// Puter is a browser package. Its remote import() does not compile for Hermes.
+// Native builds do not call it. The web bundle still loads the real module.
+const upstreamResolve = config.resolver.resolveRequest;
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (platform !== "web" && moduleName === "@heyputer/puter.js") {
+    return { type: "empty" };
+  }
+  if (upstreamResolve) return upstreamResolve(context, moduleName, platform);
+  return context.resolveRequest(context, moduleName, platform);
+};
+
 module.exports = config;

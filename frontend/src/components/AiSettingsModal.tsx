@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
-  Linking,
   Modal,
   Platform,
   Pressable,
@@ -14,10 +13,13 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import type { DashboardRow, KeyedProviderId } from "ai-buffer";
 
-import { DEFAULT_OPENROUTER_MODEL, openRouterKey, openRouterModel } from "@/src/lib/ai-keys";
-import { getAiProviderInfo, signInAiProvider } from "@/src/lib/ai-chat";
+import { isPuterSignedIn, signInAiProvider } from "@/src/lib/ai-chat";
+import { keyStoreFor, loadSyntaxDashboard, providerSelection } from "@/src/lib/ai-keys";
 import { COLORS, FONT, RADIUS, SPACING, TEXT } from "@/src/theme";
+
+const KEYED = new Set<string>(["openrouter", "space-bunny", "vercel-gateway", "gemini", "nvidia", "llmapi"]);
 
 export function AiSettingsModal({
   visible,
@@ -29,91 +31,79 @@ export function AiSettingsModal({
   onSaved?: () => void;
 }) {
   const { height } = useWindowDimensions();
-  const isWeb = Platform.OS === "web";
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
-  const [providerLabel, setProviderLabel] = useState("");
-  const [providerDesc, setProviderDesc] = useState("");
-  const [providerReady, setProviderReady] = useState(false);
+  const [rows, setRows] = useState<DashboardRow[]>([]);
+  const [models, setModels] = useState<Record<string, string>>({});
+  const [keyDrafts, setKeyDrafts] = useState<Record<string, string>>({});
 
-  const [apiKey, setApiKey] = useState("");
-  const [keyLoaded, setKeyLoaded] = useState(false);
-  const [model, setModel] = useState(DEFAULT_OPENROUTER_MODEL);
+  const refresh = async () => {
+    const signedIn = Platform.OS === "web" ? await isPuterSignedIn() : false;
+    const next = await loadSyntaxDashboard(signedIn);
+    setRows(next);
+    setModels(Object.fromEntries(next.map((row) => [row.id, row.model])));
+  };
 
   useEffect(() => {
     if (!visible) return;
+    let cancelled = false;
     (async () => {
       setLoading(true);
-      setStatus(null);
       try {
-        const info = await getAiProviderInfo();
-        setProviderLabel(info.label);
-        setProviderDesc(info.description);
-        setProviderReady(info.configured);
-        const [savedKey, savedModel] = await Promise.all([openRouterKey.get(), openRouterModel.get()]);
-        if (savedKey) setApiKey(savedKey);
-        setKeyLoaded(!!savedKey);
-        setModel(savedModel);
+        const signedIn = Platform.OS === "web" ? await isPuterSignedIn() : false;
+        const next = await loadSyntaxDashboard(signedIn);
+        if (cancelled) return;
+        setRows(next);
+        setModels(Object.fromEntries(next.map((row) => [row.id, row.model])));
+        setKeyDrafts({});
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
-  }, [visible, isWeb]);
+    return () => {
+      cancelled = true;
+    };
+  }, [visible]);
 
-  const saveNativeKey = async () => {
-    setBusy(true);
-    setStatus(null);
-    try {
-      const trimmed = apiKey.trim();
-      if (!trimmed) {
-        setStatus({ ok: false, text: "Paste your OpenRouter API key first." });
-        return;
+  const choose = async (row: DashboardRow) => {
+    await providerSelection().setProvider(row.id);
+    if (row.id === "puter" && Platform.OS === "web" && !row.configured) {
+      try {
+        await signInAiProvider();
+      } catch {
+        // Sign-in failure has no approved dashboard string.
       }
-      await openRouterKey.set(trimmed);
-      await openRouterModel.set(model.trim() || DEFAULT_OPENROUTER_MODEL);
-      setKeyLoaded(true);
-      setProviderReady(true);
-      setStatus({ ok: true, text: "OpenRouter key saved on this device." });
-      onSaved?.();
-    } catch (e) {
-      setStatus({ ok: false, text: String(e) });
-    } finally {
-      setBusy(false);
     }
+    await refresh();
+    onSaved?.();
   };
 
-  const clearNativeKey = async () => {
-    setBusy(true);
-    setStatus(null);
+  const commitModel = async (row: DashboardRow) => {
+    const value = models[row.id] ?? "";
     try {
-      await openRouterKey.clear();
-      setApiKey("");
-      setKeyLoaded(false);
-      setProviderReady(false);
-      setStatus({ ok: true, text: "OpenRouter key removed." });
-      onSaved?.();
-    } finally {
-      setBusy(false);
+      await providerSelection().setModel(row.id, value);
+    } catch {
+      // A key pasted into the model field is rejected. No approved error string.
     }
+    await refresh();
+    onSaved?.();
   };
 
-  const signInPuter = async () => {
-    setBusy(true);
-    setStatus(null);
-    try {
-      await signInAiProvider();
-      const info = await getAiProviderInfo();
-      setProviderLabel(info.label);
-      setProviderDesc(info.description);
-      setProviderReady(info.configured);
-      setStatus({ ok: true, text: "Signed in to Puter." });
-      onSaved?.();
-    } catch (e) {
-      setStatus({ ok: false, text: String(e) });
-    } finally {
-      setBusy(false);
-    }
+  const commitKey = async (row: DashboardRow) => {
+    if (!KEYED.has(row.id)) return;
+    const value = (keyDrafts[row.id] ?? "").trim();
+    if (!value) return;
+    await keyStoreFor(row.id as KeyedProviderId).setKey(value);
+    setKeyDrafts((drafts) => ({ ...drafts, [row.id]: "" }));
+    await refresh();
+    onSaved?.();
+  };
+
+  const clearKey = async (row: DashboardRow) => {
+    if (!KEYED.has(row.id) || !row.keyHint) return;
+    await keyStoreFor(row.id as KeyedProviderId).clearKey();
+    setKeyDrafts((drafts) => ({ ...drafts, [row.id]: "" }));
+    await refresh();
+    onSaved?.();
   };
 
   return (
@@ -122,7 +112,7 @@ export function AiSettingsModal({
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.sheetWrap}>
         <View style={[styles.sheet, { maxHeight: height * 0.88 }]}>
           <View style={styles.header}>
-            <Text style={styles.title}>AI settings</Text>
+            <Text style={styles.title}>ai-buffer</Text>
             <Pressable onPress={onClose} hitSlop={8} testID="ai-settings-close">
               <Feather name="x" size={22} color={COLORS.onSurfaceSecondary} />
             </Pressable>
@@ -132,85 +122,55 @@ export function AiSettingsModal({
             <ActivityIndicator color={COLORS.brand} style={{ marginVertical: SPACING.xl }} />
           ) : (
             <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
-              <View style={styles.infoBox}>
-                <Text style={styles.infoTitle}>{providerLabel}</Text>
-                <Text style={styles.infoText}>{providerDesc}</Text>
-                <Text style={[styles.infoText, { marginTop: SPACING.sm }]}>
-                  {providerReady ? "Ready to chat." : "Setup required before sending messages."}
-                </Text>
-              </View>
-
-              {isWeb ? (
-                <>
-                  <Text style={styles.sectionLabel}>Web — Puter sign-in</Text>
-                  <Text style={styles.help}>
-                    Puter stays first. You may be asked to sign in the first time you send a message. Usage is billed to
-                    your Puter account, not the app developer.
-                  </Text>
-                  <Pressable
-                    style={[styles.primaryBtn, busy && { opacity: 0.6 }]}
-                    onPress={signInPuter}
-                    disabled={busy}
-                    testID="ai-puter-signin-btn"
+              {rows.map((row) => {
+                const active = Boolean(row.activeLabel);
+                return (
+                  <View
+                    key={row.id}
+                    style={[styles.row, active && styles.rowActive]}
+                    testID={`ai-provider-row-${row.id}`}
                   >
-                    <Text style={styles.primaryBtnText}>{busy ? "Working…" : "Sign in to Puter"}</Text>
-                  </Pressable>
-                  <Pressable onPress={() => Linking.openURL("https://puter.com")} style={styles.linkBtn}>
-                    <Text style={styles.linkText}>Open puter.com</Text>
-                  </Pressable>
-                </>
-              ) : null}
-              <Text style={styles.sectionLabel}>
-                {isWeb ? "Optional key for Space Bunny Alpha" : "Mobile — your OpenRouter key"}
-              </Text>
-              <Text style={styles.help}>
-                {isWeb
-                  ? "A key saved in this browser tries Space Bunny Alpha, then the model below, when Puter cannot answer. The key is not sent to the Syntax server."
-                  : "The key stays in the device keychain. Space Bunny Alpha runs first, then the model below. It is sent only to OpenRouter."}
-              </Text>
-              <Text style={styles.fieldLabel}>OpenRouter API key</Text>
-                  <TextInput
-                    value={apiKey}
-                    onChangeText={setApiKey}
-                    placeholder="sk-or-…"
-                    placeholderTextColor={COLORS.onSurfaceSecondary}
-                    secureTextEntry={keyLoaded && apiKey.length > 8}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    style={styles.input}
-                    testID="ai-openrouter-key"
-                  />
-                  <Text style={styles.fieldLabel}>Model slug</Text>
-                  <TextInput
-                    value={model}
-                    onChangeText={setModel}
-                    placeholder={DEFAULT_OPENROUTER_MODEL}
-                    placeholderTextColor={COLORS.onSurfaceSecondary}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    style={styles.input}
-                    testID="ai-openrouter-model"
-                  />
-                  <Pressable
-                    style={[styles.primaryBtn, busy && { opacity: 0.6 }]}
-                    onPress={saveNativeKey}
-                    disabled={busy}
-                    testID="ai-save-key-btn"
-                  >
-                    <Text style={styles.primaryBtnText}>{busy ? "Saving…" : "Save key"}</Text>
-                  </Pressable>
-                  {keyLoaded ? (
-                    <Pressable onPress={clearNativeKey} disabled={busy} style={styles.linkBtn}>
-                      <Text style={[styles.linkText, { color: COLORS.error }]}>Remove saved key</Text>
+                    <Pressable
+                      onPress={() => void choose(row)}
+                      testID={row.id === "puter" ? "ai-puter-signin-btn" : `ai-provider-${row.id}`}
+                    >
+                      <Text style={styles.provider}>{row.label}</Text>
                     </Pressable>
-                  ) : null}
-              <Pressable onPress={() => Linking.openURL("https://openrouter.ai/keys")} style={styles.linkBtn}>
-                <Text style={styles.linkText}>Get a key at openrouter.ai/keys</Text>
-              </Pressable>
-
-              {status ? (
-                <Text style={[styles.status, { color: status.ok ? COLORS.success : COLORS.error }]}>{status.text}</Text>
-              ) : null}
+                    <Text style={styles.meta}>{row.status}</Text>
+                    <Pressable onLongPress={() => void clearKey(row)} disabled={!row.keyHint}>
+                      <Text style={styles.meta} testID={`ai-key-hint-${row.id}`}>
+                        {row.keyHint}
+                      </Text>
+                    </Pressable>
+                    <Text style={styles.meta}>{row.activeLabel}</Text>
+                    <View style={styles.modelLine}>
+                      <Text style={styles.meta}>{row.modelLabel}</Text>
+                      <TextInput
+                        value={models[row.id] ?? ""}
+                        onChangeText={(value) => setModels((current) => ({ ...current, [row.id]: value }))}
+                        onEndEditing={() => void commitModel(row)}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        accessibilityLabel={row.modelLabel}
+                        style={[styles.input, styles.modelInput]}
+                        testID={row.id === "openrouter" ? "ai-openrouter-model" : `ai-model-${row.id}`}
+                      />
+                    </View>
+                    {KEYED.has(row.id) ? (
+                      <TextInput
+                        value={keyDrafts[row.id] ?? ""}
+                        onChangeText={(value) => setKeyDrafts((current) => ({ ...current, [row.id]: value }))}
+                        onEndEditing={() => void commitKey(row)}
+                        secureTextEntry
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        style={styles.input}
+                        testID={row.id === "openrouter" ? "ai-openrouter-key" : `ai-key-${row.id}`}
+                      />
+                    ) : null}
+                  </View>
+                );
+              })}
             </ScrollView>
           )}
         </View>
@@ -241,21 +201,20 @@ const styles = StyleSheet.create({
   },
   title: { color: COLORS.onSurface, fontSize: TEXT.lg, fontWeight: "700" },
   body: { padding: SPACING.lg, gap: SPACING.sm },
-  infoBox: {
+  row: {
     backgroundColor: COLORS.surfaceSecondary,
     borderRadius: RADIUS.md,
     padding: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.border,
-    marginBottom: SPACING.sm,
+    gap: SPACING.sm,
   },
-  infoTitle: { color: COLORS.brand, fontSize: TEXT.sm, fontWeight: "700", textTransform: "uppercase", letterSpacing: 1 },
-  infoText: { color: COLORS.onSurfaceSecondary, fontSize: TEXT.sm, lineHeight: 20, marginTop: SPACING.xs },
-  sectionLabel: { color: COLORS.onSurface, fontSize: TEXT.base, fontWeight: "600", marginTop: SPACING.sm },
-  help: { color: COLORS.onSurfaceSecondary, fontSize: TEXT.sm, lineHeight: 20 },
-  fieldLabel: { color: COLORS.onSurfaceSecondary, fontSize: TEXT.sm, marginTop: SPACING.sm },
+  rowActive: { borderColor: COLORS.brand },
+  provider: { color: COLORS.onSurface, fontSize: TEXT.base, fontWeight: "700" },
+  meta: { color: COLORS.onSurfaceSecondary, fontSize: TEXT.sm },
+  modelLine: { flexDirection: "row", alignItems: "center", gap: SPACING.sm },
   input: {
-    backgroundColor: COLORS.surfaceSecondary,
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: COLORS.border,
     borderRadius: RADIUS.md,
@@ -265,15 +224,5 @@ const styles = StyleSheet.create({
     fontFamily: FONT.mono,
     fontSize: TEXT.sm,
   },
-  primaryBtn: {
-    backgroundColor: COLORS.brand,
-    borderRadius: RADIUS.md,
-    paddingVertical: SPACING.md,
-    alignItems: "center",
-    marginTop: SPACING.md,
-  },
-  primaryBtnText: { color: COLORS.onBrand, fontWeight: "700", fontSize: TEXT.base },
-  linkBtn: { paddingVertical: SPACING.sm, alignItems: "center" },
-  linkText: { color: COLORS.brand, fontSize: TEXT.sm },
-  status: { fontSize: TEXT.sm, marginTop: SPACING.md, textAlign: "center" },
+  modelInput: { flex: 1 },
 });

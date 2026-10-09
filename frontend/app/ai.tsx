@@ -45,6 +45,7 @@ export default function AiScreen() {
   const [sending, setSending] = useState<boolean>(false);
   const [editorCtx, setEditorCtx] = useState<EditorContext | undefined>(undefined);
   const [providerLabel, setProviderLabel] = useState<string>("");
+  const [providerStatus, setProviderStatus] = useState<string>("");
   const [providerReady, setProviderReady] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const listRef = useRef<FlatList<Msg>>(null);
@@ -52,6 +53,7 @@ export default function AiScreen() {
   const refreshProvider = useCallback(async () => {
     const info = await getAiProviderInfo();
     setProviderLabel(info.label);
+    setProviderStatus(info.description);
     setProviderReady(info.configured);
   }, []);
 
@@ -168,13 +170,6 @@ export default function AiScreen() {
     else router.replace("/");
   };
 
-  const providerHint =
-    Platform.OS === "web"
-      ? "Puter runs first. A key in settings tries Space Bunny Alpha, then your OpenRouter model."
-      : providerReady
-        ? "Space Bunny Alpha, then your OpenRouter model. The key stays on this device."
-        : "Add your OpenRouter key in settings to enable AI.";
-
   return (
     <SafeAreaView style={styles.root} edges={["top", "bottom"]}>
       <View style={styles.header}>
@@ -184,7 +179,7 @@ export default function AiScreen() {
         <View style={{ flex: 1 }}>
           <Text style={styles.title}>AI Assistant</Text>
           <Text style={styles.subtitle} numberOfLines={1}>
-            {providerLabel || (Platform.OS === "web" ? "Puter" : "OpenRouter BYOK")}
+            {providerLabel || "ai-buffer"}
           </Text>
           {editorCtx ? (
             <Text style={styles.contextHint} numberOfLines={1} testID="ai-context-hint">
@@ -210,7 +205,7 @@ export default function AiScreen() {
               <Feather name="cpu" size={28} color={COLORS.brand} />
             </View>
             <Text style={styles.emptyTitle}>How can I help with your code today?</Text>
-            <Text style={styles.emptySub}>{providerHint}</Text>
+            <Text style={styles.emptySub}>{providerStatus}</Text>
             {!providerReady && Platform.OS !== "web" ? (
               <Pressable style={styles.setupBtn} onPress={() => setShowSettings(true)} testID="ai-open-settings-cta">
                 <Text style={styles.setupBtnText}>Open AI settings</Text>
