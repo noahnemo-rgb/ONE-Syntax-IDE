@@ -1,34 +1,112 @@
 // Push / share destinations. All calls are made directly from the client so
 // user secrets (GitHub PAT, webhook token) never touch our backend.
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { maskKeyHint } from "ai-buffer";
 import * as FileSystem from "expo-file-system/legacy";
 import * as SecureStore from "expo-secure-store";
 import * as Sharing from "expo-sharing";
 import { Platform, Share } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// --- Secure keys ---
-const GH_PAT_KEY = "syntax.gh_pat";
-const WEBHOOK_TOKEN_KEY = "syntax.webhook_token";
+import {
+  GH_PAT_KEY,
+  PUSH_SECRET_KEYS,
+  WEBHOOK_TOKEN_KEY,
+  createPushSecretStore,
+  hideSecret,
+  takeDurablePushSecrets,
+  type PushSecretStore,
+} from "./push-secrets.js";
 
-// SecureStore is not available on web — fall back to AsyncStorage there.
-async function secureGet(key: string): Promise<string | null> {
-  if (Platform.OS === "web") return AsyncStorage.getItem(key);
-  return SecureStore.getItemAsync(key);
+const secureStore = {
+  get: (key: string) => SecureStore.getItemAsync(key),
+  set: (key: string, value: string) => SecureStore.setItemAsync(key, value),
+  delete: async (key: string) => {
+    try {
+      await SecureStore.deleteItemAsync(key);
+    } catch {
+      // Missing keys reject on some native versions.
+    }
+  },
+};
+
+let secretStore: PushSecretStore | null = null;
+let secretMigration: Promise<void> | null = null;
+
+function browserBucket(name: "localStorage" | "sessionStorage") {
+  if (Platform.OS !== "web") return undefined;
+  try {
+    return (globalThis as { localStorage?: Storage; sessionStorage?: Storage })[name];
+  } catch {
+    return undefined;
+  }
 }
-async function secureSet(key: string, value: string): Promise<void> {
-  if (Platform.OS === "web") return AsyncStorage.setItem(key, value);
-  return SecureStore.setItemAsync(key, value);
+
+function getPushSecrets(): PushSecretStore {
+  if (secretStore) return secretStore;
+  secretStore = createPushSecretStore({
+    platform: Platform.OS === "web" ? "web" : "native",
+    secureStore,
+  });
+  return secretStore;
 }
-async function secureDelete(key: string): Promise<void> {
-  if (Platform.OS === "web") return AsyncStorage.removeItem(key);
-  return SecureStore.deleteItemAsync(key);
+
+function migratePushSecrets(): Promise<void> {
+  if (!secretMigration) {
+    secretMigration = migratePushSecretsOnce().catch((error) => {
+      secretMigration = null;
+      throw error;
+    });
+  }
+  return secretMigration;
+}
+
+async function migratePushSecretsOnce(): Promise<void> {
+  if (Platform.OS !== "web") return;
+  const store = getPushSecrets();
+  const found: Record<string, string> = {};
+  for (const key of PUSH_SECRET_KEYS) {
+    const value = await AsyncStorage.getItem(key);
+    if (value?.trim()) found[key] = value;
+  }
+  for (const bucket of [browserBucket("localStorage"), browserBucket("sessionStorage")]) {
+    const lifted = takeDurablePushSecrets(bucket);
+    for (const key of PUSH_SECRET_KEYS) {
+      if (!found[key] && lifted[key]) found[key] = lifted[key];
+    }
+  }
+  for (const key of PUSH_SECRET_KEYS) {
+    const value = found[key];
+    if (value?.trim() && !(await store.get(key))) await store.set(key, value);
+    await AsyncStorage.removeItem(key);
+  }
+}
+
+async function readSecret(name: string): Promise<string | null> {
+  await migratePushSecrets();
+  return getPushSecrets().get(name);
+}
+
+async function writeSecret(name: string, value: string): Promise<void> {
+  await migratePushSecrets();
+  await getPushSecrets().set(name, value);
+}
+
+async function clearSecret(name: string): Promise<void> {
+  await migratePushSecrets();
+  await getPushSecrets().clear(name);
+}
+
+async function secretHint(name: string): Promise<string> {
+  await migratePushSecrets();
+  return getPushSecrets().hint(name);
 }
 
 // --- GitHub PAT ---
 export const githubPat = {
-  get: () => secureGet(GH_PAT_KEY),
-  set: (t: string) => secureSet(GH_PAT_KEY, t),
-  clear: () => secureDelete(GH_PAT_KEY),
+  get: () => readSecret(GH_PAT_KEY),
+  set: (t: string) => writeSecret(GH_PAT_KEY, t),
+  clear: () => clearSecret(GH_PAT_KEY),
+  hint: () => secretHint(GH_PAT_KEY),
 };
 
 // --- GitHub push config (non-secret) ---
@@ -53,10 +131,13 @@ export interface WebhookConfig {
 }
 const WH_CFG_KEY = "syntax.webhook_cfg";
 export const webhookToken = {
-  get: () => secureGet(WEBHOOK_TOKEN_KEY),
-  set: (t: string) => secureSet(WEBHOOK_TOKEN_KEY, t),
-  clear: () => secureDelete(WEBHOOK_TOKEN_KEY),
+  get: () => readSecret(WEBHOOK_TOKEN_KEY),
+  set: (t: string) => writeSecret(WEBHOOK_TOKEN_KEY, t),
+  clear: () => clearSecret(WEBHOOK_TOKEN_KEY),
+  hint: () => secretHint(WEBHOOK_TOKEN_KEY),
 };
+
+export { hideSecret };
 export async function loadWebhookConfig(): Promise<WebhookConfig | null> {
   const raw = await AsyncStorage.getItem(WH_CFG_KEY);
   return raw ? (JSON.parse(raw) as WebhookConfig) : null;
@@ -80,9 +161,7 @@ function utf8ToBase64(text: string): string {
 
 // --- Redact a token for error messages ---
 export function redact(token: string): string {
-  if (!token) return "";
-  if (token.length <= 8) return "***";
-  return `${token.slice(0, 4)}…${token.slice(-4)}`;
+  return maskKeyHint(token);
 }
 
 // --- GitHub push (create or update a single file) ---
@@ -117,7 +196,7 @@ export async function pushToGitHub(opts: {
     if (!Array.isArray(j)) sha = j.sha;
   } else if (getRes.status !== 404) {
     const body = await getRes.text();
-    throw new Error(`GitHub read failed (${getRes.status}): ${body.slice(0, 200)}`);
+    throw new Error(hideSecret(`GitHub read failed (${getRes.status}): ${body.slice(0, 200)}`, pat));
   }
   // 2) PUT create/update
   const putRes = await fetch(base, {
@@ -132,7 +211,7 @@ export async function pushToGitHub(opts: {
   });
   if (!putRes.ok) {
     const body = await putRes.text();
-    throw new Error(`GitHub push failed (${putRes.status}): ${body.slice(0, 200)}`);
+    throw new Error(hideSecret(`GitHub push failed (${putRes.status}): ${body.slice(0, 200)}`, pat));
   }
   const json = await putRes.json();
   return {
@@ -162,7 +241,7 @@ export async function pushToWebhook(opts: {
   });
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`Webhook responded ${res.status}: ${body.slice(0, 200)}`);
+    throw new Error(hideSecret(`Webhook responded ${res.status}: ${body.slice(0, 200)}`, token ?? ""));
   }
   return { status: res.status };
 }

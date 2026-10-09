@@ -11,7 +11,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test:ai-buffer": "node --test src/lib/syntax-router.test.mjs src/lib/ai-provider-stores.test.mjs",
+    "test:ai-buffer": "node --test src/lib/syntax-router.test.mjs src/lib/ai-provider-stores.test.mjs src/lib/push-secrets.test.mjs",
     "eas:login": "npx eas-cli login",
     "eas:init": "npx eas-cli init",
     "eas:configure": "npx eas-cli update:configure",

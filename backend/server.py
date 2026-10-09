@@ -24,6 +24,7 @@ from auth_utils import (
     verify_password,
 )
 from openrouter_chat import FAILOVER_STATUS, OpenRouterStatus, build_messages, model_attempts, stream_openrouter
+from redact_provider import redact_provider_text
 from sandbox_run import run_isolated
 from snippet_search import (
     build_snippet_filter,
@@ -682,7 +683,7 @@ async def chat_stream(payload: ChatRequest, user: AuthUser = Depends(require_use
             )
         except Exception as e:
             logging.exception("chat_stream error")
-            yield f"\n[Error: {str(e)}]"
+            yield f"\n[Error: {redact_provider_text(str(e))}]"
 
     return StreamingResponse(
         event_gen(),
