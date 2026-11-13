@@ -28,7 +28,8 @@ for (const [net, prefix] of [
 for (const [net, prefix] of [
   ["::", 128],
   ["::1", 128],
-  ["::ffff:0:0", 96],
+  // No ::ffff:0:0/96 rule: BlockList matches every IPv4 address against it.
+  // isPublicIp unwraps IPv4-mapped addresses and checks the IPv4 rules instead.
   ["64:ff9b::", 96],
   ["100::", 64],
   ["2001:db8::", 32],
