@@ -1,0 +1,599 @@
+{
+ "results": [
+  {
+   "check_id": "workspace.patch-ai.workers.scanner.rules.patchai.patchai.python.sql-injection.string-format",
+   "path": "/src/app.py",
+   "start": {
+    "line": 17,
+    "col": 16,
+    "offset": 320
+   },
+   "end": {
+    "line": 17,
+    "col": 76,
+    "offset": 380
+   },
+   "extra": {
+    "metavars": {
+     "$DB": {
+      "start": {
+       "line": 17,
+       "col": 16,
+       "offset": 320
+      },
+      "end": {
+       "line": 17,
+       "col": 20,
+       "offset": 324
+      },
+      "abstract_content": "conn",
+      "propagated_value": {
+       "svalue_start": {
+        "line": 15,
+        "col": 12,
+        "offset": 240
+       },
+       "svalue_end": {
+        "line": 15,
+        "col": 40,
+        "offset": 268
+       },
+       "svalue_abstract_content": "sqlite3.connect(\"db.sqlite\")"
+      }
+     },
+     "$X": {
+      "start": {
+       "line": 17,
+       "col": 71,
+       "offset": 375
+      },
+      "end": {
+       "line": 17,
+       "col": 75,
+       "offset": 379
+      },
+      "abstract_content": "name",
+      "propagated_value": {
+       "svalue_start": {
+        "line": 16,
+        "col": 12,
+        "offset": 280
+       },
+       "svalue_end": {
+        "line": 16,
+        "col": 36,
+        "offset": 304
+       },
+       "svalue_abstract_content": "request.args.get(\"name\")"
+      }
+     }
+    },
+    "message": "SQL query built with string formatting or concatenation. If any part comes from user input, an attacker can change the query. Use parameterized queries (e.g. cursor.execute(sql, params)).",
+    "metadata": {
+     "cwe": "CWE-89",
+     "category": "sast",
+     "confidence": "MEDIUM"
+    },
+    "severity": "ERROR",
+    "fingerprint": "67c445a1b5dc2882c602f94a78e4a08ea988042637b80aec30b6dd01d9ec6c7f300882bb475abf454d8c3c74bb3490a4d60b9547393dc1d3c137df0986d5b9e4_0",
+    "lines": "    return str(conn.execute(\"SELECT * FROM users WHERE name = '%s'\" % name).fetchall())",
+    "is_ignored": false,
+    "validation_state": "NO_VALIDATOR",
+    "engine_kind": "Opengrep"
+   }
+  },
+  {
+   "check_id": "workspace.patch-ai.workers.scanner.rules.patchai.patchai.python.command-injection.shell-true",
+   "path": "/src/app.py",
+   "start": {
+    "line": 23,
+    "col": 12,
+    "offset": 474
+   },
+   "end": {
+    "line": 23,
+    "col": 68,
+    "offset": 530
+   },
+   "extra": {
+    "metavars": {
+     "$F": {
+      "start": {
+       "line": 23,
+       "col": 23,
+       "offset": 485
+      },
+      "end": {
+       "line": 23,
+       "col": 35,
+       "offset": 497
+      },
+      "abstract_content": "check_output"
+     },
+     "$CMD": {
+      "start": {
+       "line": 23,
+       "col": 36,
+       "offset": 498
+      },
+      "end": {
+       "line": 23,
+       "col": 55,
+       "offset": 517
+      },
+      "abstract_content": "\"ping -c 1 \"+host"
+     }
+    },
+    "message": "A subprocess runs through the shell with a non-constant command. Shell metacharacters in the input lead to command injection. Pass an argument list and drop shell=True.",
+    "metadata": {
+     "cwe": "CWE-78",
+     "category": "sast",
+     "confidence": "HIGH"
+    },
+    "severity": "ERROR",
+    "fingerprint": "e8e8f1c9ecfcb551bd7ffcd2908e08ec95cd612357dce2a64acde5f8db8b5c1a81c4810bc0531e80c47aa59de80c64f80d6d1512ede0222e3b21b6888cbb27ff_0",
+    "lines": "    return subprocess.check_output(\"ping -c 1 \" + host, shell=True)",
+    "is_ignored": false,
+    "validation_state": "NO_VALIDATOR",
+    "engine_kind": "Opengrep"
+   }
+  },
+  {
+   "check_id": "workspace.patch-ai.workers.scanner.rules.patchai.patchai.python.deserialization.pickle",
+   "path": "/src/app.py",
+   "start": {
+    "line": 28,
+    "col": 16,
+    "offset": 580
+   },
+   "end": {
+    "line": 28,
+    "col": 42,
+    "offset": 606
+   },
+   "extra": {
+    "metavars": {},
+    "message": "Unpickling data you don't fully control executes arbitrary code. Use JSON or a safe schema-based format.",
+    "metadata": {
+     "cwe": "CWE-502",
+     "category": "sast",
+     "confidence": "MEDIUM"
+    },
+    "severity": "ERROR",
+    "fingerprint": "eb90209ffa517252a9c7a46d0009270f01469659cac2005246f14517c82491fdb8d8dfe53ffc57a1b055242a34d376a566627284125f2b53cef3c0edf818cdc6_0",
+    "lines": "    return str(pickle.loads(request.data))",
+    "is_ignored": false,
+    "validation_state": "NO_VALIDATOR",
+    "engine_kind": "Opengrep"
+   }
+  },
+  {
+   "check_id": "workspace.patch-ai.workers.scanner.rules.patchai.patchai.python.deserialization.yaml-load",
+   "path": "/src/app.py",
+   "start": {
+    "line": 33,
+    "col": 16,
+    "offset": 674
+   },
+   "end": {
+    "line": 33,
+    "col": 28,
+    "offset": 686
+   },
+   "extra": {
+    "metavars": {},
+    "message": "yaml.load without SafeLoader can construct arbitrary Python objects. Use yaml.safe_load.",
+    "metadata": {
+     "cwe": "CWE-502",
+     "category": "sast",
+     "confidence": "HIGH"
+    },
+    "severity": "ERROR",
+    "fingerprint": "12c1bea6b8ab4debe5ecda20a151e9898bcd23e0f96dcf475f1fa822c84fccb6c1ffbcca909500f786cfd4f749667b5898d17d9cc9d91b3b15fd75e6fe9c11a7_0",
+    "lines": "        return yaml.load(f)",
+    "is_ignored": false,
+    "validation_state": "NO_VALIDATOR",
+    "engine_kind": "Opengrep"
+   }
+  },
+  {
+   "check_id": "workspace.patch-ai.workers.scanner.rules.patchai.patchai.python.crypto.weak-hash",
+   "path": "/src/app.py",
+   "start": {
+    "line": 37,
+    "col": 12,
+    "offset": 723
+   },
+   "end": {
+    "line": 37,
+    "col": 36,
+    "offset": 747
+   },
+   "extra": {
+    "metavars": {},
+    "message": "MD5 and SHA-1 are broken for security purposes. Use SHA-256, or bcrypt/argon2 for passwords.",
+    "metadata": {
+     "cwe": "CWE-327",
+     "category": "sast",
+     "confidence": "LOW"
+    },
+    "severity": "WARNING",
+    "fingerprint": "da942426ceff3da290e95ee8e34fa0eeaebe0c157f72dd051d9f4b8d42f369c93766afe89eb3edb89618d6cbd4659e80869078074baffde1217bf9722a9a8a38_0",
+    "lines": "    return hashlib.md5(pw.encode()).hexdigest()",
+    "is_ignored": false,
+    "validation_state": "NO_VALIDATOR",
+    "engine_kind": "Opengrep"
+   }
+  },
+  {
+   "check_id": "workspace.patch-ai.workers.scanner.rules.patchai.patchai.python.flask.debug-enabled",
+   "path": "/src/app.py",
+   "start": {
+    "line": 41,
+    "col": 5,
+    "offset": 793
+   },
+   "end": {
+    "line": 41,
+    "col": 40,
+    "offset": 828
+   },
+   "extra": {
+    "metavars": {
+     "$APP": {
+      "start": {
+       "line": 41,
+       "col": 5,
+       "offset": 793
+      },
+      "end": {
+       "line": 41,
+       "col": 8,
+       "offset": 796
+      },
+      "abstract_content": "app",
+      "propagated_value": {
+       "svalue_start": {
+        "line": 10,
+        "col": 7,
+        "offset": 179
+       },
+       "svalue_end": {
+        "line": 10,
+        "col": 22,
+        "offset": 194
+       },
+       "svalue_abstract_content": "Flask(__name__)"
+      }
+     }
+    },
+    "message": "Flask debug mode exposes an interactive debugger that allows remote code execution. Never enable it in production.",
+    "metadata": {
+     "cwe": "CWE-489",
+     "category": "sast",
+     "confidence": "HIGH"
+    },
+    "severity": "WARNING",
+    "fingerprint": "eb1efd8edc3748c8ff3629a633562ad4b3a6b809fa5e0b688f12823cbac34691602bccecb5a682f988d02a0a7c8c9ff97154f4de4f1eb6d081bb5db38467efd4_0",
+    "lines": "    app.run(debug=True, host=\"0.0.0.0\")",
+    "is_ignored": false,
+    "validation_state": "NO_VALIDATOR",
+    "engine_kind": "Opengrep"
+   }
+  },
+  {
+   "check_id": "workspace.patch-ai.workers.scanner.rules.patchai.patchai.js.command-injection.child-process",
+   "path": "/src/server.js",
+   "start": {
+    "line": 7,
+    "col": 3,
+    "offset": 202
+   },
+   "end": {
+    "line": 7,
+    "col": 59,
+    "offset": 258
+   },
+   "extra": {
+    "metavars": {
+     "$CP": {
+      "start": {
+       "line": 7,
+       "col": 3,
+       "offset": 202
+      },
+      "end": {
+       "line": 7,
+       "col": 7,
+       "offset": 206
+      },
+      "abstract_content": "exec"
+     },
+     "$CMD": {
+      "start": {
+       "line": 7,
+       "col": 8,
+       "offset": 207
+      },
+      "end": {
+       "line": 7,
+       "col": 29,
+       "offset": 228
+      },
+      "abstract_content": "\"ls \"+req.query.dir"
+     }
+    },
+    "message": "child_process exec/execSync runs a shell with a non-constant command. Use execFile/spawn with an argument array, and never pass request data to a shell.",
+    "metadata": {
+     "cwe": "CWE-78",
+     "category": "sast",
+     "confidence": "MEDIUM"
+    },
+    "severity": "ERROR",
+    "fingerprint": "9f4ae0c5660fc3c44dc798f59df6352d55d82279b857152196ef27d77652530d7457f606260d0798ca1204f421172d66fb87add0c3373da3a8b1fc58ada267f7_0",
+    "lines": "  exec(\"ls \" + req.query.dir, (err, out) => res.send(out));",
+    "is_ignored": false,
+    "validation_state": "NO_VALIDATOR",
+    "engine_kind": "Opengrep"
+   }
+  },
+  {
+   "check_id": "workspace.patch-ai.workers.scanner.rules.patchai.patchai.js.xss.express-send-request-data",
+   "path": "/src/server.js",
+   "start": {
+    "line": 11,
+    "col": 12,
+    "offset": 309
+   },
+   "end": {
+    "line": 11,
+    "col": 40,
+    "offset": 337
+   },
+   "extra": {
+    "metavars": {
+     "$RES": {
+      "start": {
+       "line": 11,
+       "col": 3,
+       "offset": 300
+      },
+      "end": {
+       "line": 11,
+       "col": 6,
+       "offset": 303
+      },
+      "abstract_content": "res"
+     },
+     "$X": {
+      "start": {
+       "line": 11,
+       "col": 12,
+       "offset": 309
+      },
+      "end": {
+       "line": 11,
+       "col": 40,
+       "offset": 337
+      },
+      "abstract_content": "String(eval(req.query.expr))"
+     },
+     "$REQ": {
+      "start": {
+       "line": 11,
+       "col": 24,
+       "offset": 321
+      },
+      "end": {
+       "line": 11,
+       "col": 27,
+       "offset": 324
+      },
+      "abstract_content": "req"
+     }
+    },
+    "message": "Request data is written into an HTML response without escaping, allowing cross-site scripting. Escape output or use a template engine with autoescaping.",
+    "metadata": {
+     "cwe": "CWE-79",
+     "category": "sast",
+     "confidence": "MEDIUM"
+    },
+    "severity": "ERROR",
+    "fingerprint": "15191ce2a774c85b153f3ce4b340918cbf716b8bb74d685946c6b1f0ebcf4fdeec1696484f02b8fa09bc8de8203950ca380f79d80bce516894efc6f8ab8075ec_0",
+    "lines": "  res.send(String(eval(req.query.expr)));",
+    "is_ignored": false,
+    "validation_state": "NO_VALIDATOR",
+    "dataflow_trace": [
+     {
+      "kind": "source",
+      "location": {
+       "path": "/src/server.js",
+       "start": {
+        "line": 11,
+        "col": 24,
+        "offset": 321
+       },
+       "end": {
+        "line": 11,
+        "col": 33,
+        "offset": 330
+       }
+      },
+      "content": "req.query",
+      "children": []
+     },
+     {
+      "kind": "sink",
+      "location": {
+       "path": "/src/server.js",
+       "start": {
+        "line": 11,
+        "col": 12,
+        "offset": 309
+       },
+       "end": {
+        "line": 11,
+        "col": 40,
+        "offset": 337
+       }
+      },
+      "content": "String(eval(req.query.expr))",
+      "children": []
+     }
+    ],
+    "engine_kind": "Opengrep"
+   }
+  },
+  {
+   "check_id": "workspace.patch-ai.workers.scanner.rules.patchai.patchai.js.code-injection.eval",
+   "path": "/src/server.js",
+   "start": {
+    "line": 11,
+    "col": 19,
+    "offset": 316
+   },
+   "end": {
+    "line": 11,
+    "col": 39,
+    "offset": 336
+   },
+   "extra": {
+    "metavars": {
+     "$X": {
+      "start": {
+       "line": 11,
+       "col": 24,
+       "offset": 321
+      },
+      "end": {
+       "line": 11,
+       "col": 38,
+       "offset": 335
+      },
+      "abstract_content": "req.query.expr"
+     }
+    },
+    "message": "eval/new Function on non-constant input executes attacker-controlled code.",
+    "metadata": {
+     "cwe": "CWE-95",
+     "category": "sast",
+     "confidence": "MEDIUM"
+    },
+    "severity": "ERROR",
+    "fingerprint": "11124bcb66daa89ac107e32468f2a985e1c72d81e2c91032cabd3c2eb4adf7b1d208002b17b214dc61b78f1129368095dbc03e7568a6a729f605edc3ff0cf7d6_0",
+    "lines": "  res.send(String(eval(req.query.expr)));",
+    "is_ignored": false,
+    "validation_state": "NO_VALIDATOR",
+    "engine_kind": "Opengrep"
+   }
+  },
+  {
+   "check_id": "workspace.patch-ai.workers.scanner.rules.patchai.patchai.js.xss.express-send-request-data",
+   "path": "/src/server.js",
+   "start": {
+    "line": 15,
+    "col": 12,
+    "offset": 390
+   },
+   "end": {
+    "line": 15,
+    "col": 51,
+    "offset": 429
+   },
+   "extra": {
+    "metavars": {
+     "$RES": {
+      "start": {
+       "line": 15,
+       "col": 3,
+       "offset": 381
+      },
+      "end": {
+       "line": 15,
+       "col": 6,
+       "offset": 384
+      },
+      "abstract_content": "res"
+     },
+     "$X": {
+      "start": {
+       "line": 15,
+       "col": 12,
+       "offset": 390
+      },
+      "end": {
+       "line": 15,
+       "col": 51,
+       "offset": 429
+      },
+      "abstract_content": "\"<h1>Hello \"+req.query.name+\"</h1>\""
+     },
+     "$REQ": {
+      "start": {
+       "line": 15,
+       "col": 27,
+       "offset": 405
+      },
+      "end": {
+       "line": 15,
+       "col": 30,
+       "offset": 408
+      },
+      "abstract_content": "req"
+     }
+    },
+    "message": "Request data is written into an HTML response without escaping, allowing cross-site scripting. Escape output or use a template engine with autoescaping.",
+    "metadata": {
+     "cwe": "CWE-79",
+     "category": "sast",
+     "confidence": "MEDIUM"
+    },
+    "severity": "ERROR",
+    "fingerprint": "095cbd305a43683459abf8a651cb2daa3d44be28986fef6c60f7f9fe18f16936ded5a78cea9d9f6271938403816b0efedc018ef7baad75fd9b1423d9f600f13e_0",
+    "lines": "  res.send(\"<h1>Hello \" + req.query.name + \"</h1>\");",
+    "is_ignored": false,
+    "validation_state": "NO_VALIDATOR",
+    "dataflow_trace": [
+     {
+      "kind": "source",
+      "location": {
+       "path": "/src/server.js",
+       "start": {
+        "line": 15,
+        "col": 27,
+        "offset": 405
+       },
+       "end": {
+        "line": 15,
+        "col": 36,
+        "offset": 414
+       }
+      },
+      "content": "req.query",
+      "children": []
+     },
+     {
+      "kind": "sink",
+      "location": {
+       "path": "/src/server.js",
+       "start": {
+        "line": 15,
+        "col": 12,
+        "offset": 390
+       },
+       "end": {
+        "line": 15,
+        "col": 51,
+        "offset": 429
+       }
+      },
+      "content": "\"<h1>Hello \" + req.query.name + \"</h1>\"",
+      "children": []
+     }
+    ],
+    "engine_kind": "Opengrep"
+   }
+  }
+ ],
+ "errors": []
+}

@@ -1,0 +1,86 @@
+# Patch AI in-house rules. Copyright Patch AI; licensed for use in the Patch AI service.
+rules:
+  - id: patchai.go.sql-injection.sprintf
+    languages: [go]
+    severity: ERROR
+    message: SQL built with fmt.Sprintf or concatenation. Use placeholders ($1 / ?) and pass arguments separately.
+    metadata: { cwe: "CWE-89", category: sast, confidence: MEDIUM }
+    pattern-either:
+      - pattern: $DB.Query(fmt.Sprintf(...), ...)
+      - pattern: $DB.Exec(fmt.Sprintf(...), ...)
+      - pattern: $DB.QueryRow(fmt.Sprintf(...), ...)
+      - pattern: $DB.QueryContext($CTX, fmt.Sprintf(...), ...)
+      - pattern: $DB.ExecContext($CTX, fmt.Sprintf(...), ...)
+      - pattern: $DB.Query("..." + $X, ...)
+      - pattern: $DB.Exec("..." + $X, ...)
+
+  - id: patchai.go.command-injection.sh-c
+    languages: [go]
+    severity: ERROR
+    message: A command runs through "sh -c" with a non-constant string, allowing command injection.
+    metadata: { cwe: "CWE-78", category: sast, confidence: MEDIUM }
+    patterns:
+      - pattern-either:
+          - pattern: exec.Command("sh", "-c", $X)
+          - pattern: exec.Command("bash", "-c", $X)
+          - pattern: exec.CommandContext($CTX, "sh", "-c", $X)
+      - pattern-not: exec.Command("sh", "-c", "...")
+      - pattern-not: exec.Command("bash", "-c", "...")
+
+  - id: patchai.go.tls.insecure-skip-verify
+    languages: [go]
+    severity: WARNING
+    message: InsecureSkipVerify disables TLS certificate verification.
+    metadata: { cwe: "CWE-295", category: sast, confidence: HIGH }
+    pattern: "tls.Config{..., InsecureSkipVerify: true, ...}"
+
+  - id: patchai.go.crypto.weak-hash
+    languages: [go]
+    severity: WARNING
+    message: MD5 and SHA-1 are broken for security purposes.
+    metadata: { cwe: "CWE-327", category: sast, confidence: LOW }
+    pattern-either:
+      - pattern: md5.New()
+      - pattern: md5.Sum(...)
+      - pattern: sha1.New()
+      - pattern: sha1.Sum(...)
+
+  - id: patchai.java.sql-injection.statement-concat
+    languages: [java]
+    severity: ERROR
+    message: SQL built with string concatenation. Use PreparedStatement with bound parameters.
+    metadata: { cwe: "CWE-89", category: sast, confidence: MEDIUM }
+    pattern-either:
+      - pattern: $S.executeQuery("..." + $X)
+      - pattern: $S.execute("..." + $X)
+      - pattern: $S.executeUpdate("..." + $X)
+      - pattern: $C.prepareStatement("..." + $X)
+      - pattern: $S.executeQuery(String.format(...))
+
+  - id: patchai.java.command-injection.runtime-exec
+    languages: [java]
+    severity: ERROR
+    message: Runtime.exec with a non-constant command can allow command injection. Use ProcessBuilder with a fixed argument list.
+    metadata: { cwe: "CWE-78", category: sast, confidence: MEDIUM }
+    patterns:
+      - pattern: Runtime.getRuntime().exec($X)
+      - pattern-not: Runtime.getRuntime().exec("...")
+
+  - id: patchai.java.deserialization.object-input-stream
+    languages: [java]
+    severity: ERROR
+    message: Java native deserialization of untrusted data can lead to remote code execution. Use a safe format or an ObjectInputFilter.
+    metadata: { cwe: "CWE-502", category: sast, confidence: LOW }
+    pattern: new ObjectInputStream(...).readObject()
+
+  - id: patchai.java.xxe.document-builder
+    languages: [java]
+    severity: WARNING
+    message: DocumentBuilderFactory without disallow-doctype-decl may be vulnerable to XXE.
+    metadata: { cwe: "CWE-611", category: sast, confidence: LOW }
+    patterns:
+      - pattern: DocumentBuilderFactory.newInstance()
+      - pattern-not-inside: |
+          $F = DocumentBuilderFactory.newInstance();
+          ...
+          $F.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);

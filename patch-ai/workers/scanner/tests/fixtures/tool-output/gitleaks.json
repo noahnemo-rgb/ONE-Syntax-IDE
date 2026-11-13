@@ -1,0 +1,42 @@
+[
+ {
+  "RuleID": "github-pat",
+  "Description": "Uncovered a GitHub Personal Access Token, potentially leading to unauthorized repository access and sensitive content exposure.",
+  "StartLine": 1,
+  "EndLine": 1,
+  "StartColumn": 17,
+  "EndColumn": 56,
+  "Match": "REDACTED",
+  "Secret": "REDACTED",
+  "File": "/src/settings.py",
+  "SymlinkFile": "",
+  "Commit": "",
+  "Entropy": 4.4250703,
+  "Author": "",
+  "Email": "",
+  "Date": "",
+  "Message": "",
+  "Tags": [],
+  "Fingerprint": "/src/settings.py:github-pat:1"
+ },
+ {
+  "RuleID": "stripe-access-token",
+  "Description": "Found a Stripe Access Token, posing a risk to payment processing services and sensitive financial data.",
+  "StartLine": 2,
+  "EndLine": 2,
+  "StartColumn": 12,
+  "EndColumn": 44,
+  "Match": "REDACTED\"",
+  "Secret": "REDACTED",
+  "File": "/src/settings.py",
+  "SymlinkFile": "",
+  "Commit": "",
+  "Entropy": 4.0153193,
+  "Author": "",
+  "Email": "",
+  "Date": "",
+  "Message": "",
+  "Tags": [],
+  "Fingerprint": "/src/settings.py:stripe-access-token:2"
+ }
+]

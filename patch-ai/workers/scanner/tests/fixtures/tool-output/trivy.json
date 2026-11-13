@@ -1,0 +1,847 @@
+{
+ "SchemaVersion": 2,
+ "Trivy": {
+  "Version": "0.76.2"
+ },
+ "ReportID": "01a1d6c3-ecdd-7ed2-b137-e3e6ac618071",
+ "CreatedAt": "2026-11-13T21:15:26.813973137Z",
+ "ArtifactName": "/src",
+ "ArtifactType": "filesystem",
+ "Results": [
+  {
+   "Target": "package-lock.json",
+   "Class": "lang-pkgs",
+   "Type": "npm",
+   "Packages": [
+    {
+     "ID": "express@4.16.0",
+     "Name": "express",
+     "Identifier": {
+      "PURL": "pkg:npm/express@4.16.0",
+      "UID": "ca8167a01fdc620d"
+     },
+     "Version": "4.16.0",
+     "Relationship": "direct",
+     "Locations": [
+      {
+       "StartLine": 15,
+       "EndLine": 18
+      }
+     ],
+     "AnalyzedBy": "npm"
+    },
+    {
+     "ID": "lodash@4.17.11",
+     "Name": "lodash",
+     "Identifier": {
+      "PURL": "pkg:npm/lodash@4.17.11",
+      "UID": "7cb85437e767f21f"
+     },
+     "Version": "4.17.11",
+     "Relationship": "direct",
+     "Locations": [
+      {
+       "StartLine": 19,
+       "EndLine": 22
+      }
+     ],
+     "AnalyzedBy": "npm"
+    }
+   ],
+   "Vulnerabilities": [
+    {
+     "VulnerabilityID": "CVE-2024-29041",
+     "VendorIDs": [
+      "GHSA-rv95-896h-c2vc"
+     ],
+     "PkgID": "express@4.16.0",
+     "PkgName": "express",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/express@4.16.0",
+      "UID": "ca8167a01fdc620d"
+     },
+     "InstalledVersion": "4.16.0",
+     "FixedVersion": "4.19.2, 5.0.0-beta.3",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2024-29041",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory npm",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+     },
+     "Fingerprint": "sha256:632ec25337fb36823c9c23f5a992162a4f2d138d6a85778f097236f12ed1986c",
+     "Title": "express: cause malformed URLs to be evaluated",
+     "Description": "Express.js minimalist web framework for node. Versions of Express.js prior to 4.19.0 and all pre-release alpha and beta versions of 5.0 are affected by an open redirect vulnerability using malformed URLs. When a user of Express performs a redirect using a user-provided URL Express performs an encode [using `encodeurl`](https://github.com/pillarjs/encodeurl) on the contents before passing it to the `location` header. This can cause malformed URLs to be evaluated in unexpected ways by common redirect allow list implementations in Express applications, leading to an Open Redirect via bypass of a properly implemented allow list. The main method impacted is `res.location()` but this is also called from within `res.redirect()`. The vulnerability is fixed in 4.19.2 and 5.0.0-beta.3.",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-601",
+      "CWE-1286"
+     ],
+     "VendorSeverity": {
+      "cbl-mariner": 2,
+      "ghsa": 2,
+      "redhat": 3,
+      "ubuntu": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+       "V3Score": 6.1
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+       "V3Score": 6.1
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2024-29041",
+      "https://expressjs.com/en/4x/api.html#res.location",
+      "https://github.com/expressjs/express",
+      "https://github.com/expressjs/express/commit/0867302ddbde0e9463d0564fea5861feb708c2dd",
+      "https://github.com/expressjs/express/commit/0b746953c4bd8e377123527db11f9cd866e39f94",
+      "https://github.com/expressjs/express/pull/5539",
+      "https://github.com/expressjs/express/security/advisories/GHSA-rv95-896h-c2vc",
+      "https://github.com/koajs/koa/issues/1800",
+      "https://nvd.nist.gov/vuln/detail/CVE-2024-29041",
+      "https://ubuntu.com/security/notices/USN-7581-1",
+      "https://www.cve.org/CVERecord?id=CVE-2024-29041"
+     ],
+     "PublishedDate": "2024-03-25T21:15:46.847Z",
+     "LastModifiedDate": "2026-06-17T07:22:18.493Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2024-43796",
+     "VendorIDs": [
+      "GHSA-qw6h-vgh9-j6wx"
+     ],
+     "PkgID": "express@4.16.0",
+     "PkgName": "express",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/express@4.16.0",
+      "UID": "ca8167a01fdc620d"
+     },
+     "InstalledVersion": "4.16.0",
+     "FixedVersion": "4.20.0, 5.0.0",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2024-43796",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory npm",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+     },
+     "Fingerprint": "sha256:2870b0be0804ce3cc5a21616549a49f9c7e2e222ef2fb3915c66059fffd21ad4",
+     "Title": "express: Improper Input Handling in Express Redirects",
+     "Description": "Express.js minimalist web framework for node. In express < 4.20.0, passing untrusted user input - even after sanitizing it - to response.redirect() may execute untrusted code. This issue is patched in express 4.20.0.",
+     "Severity": "LOW",
+     "CweIDs": [
+      "CWE-79"
+     ],
+     "VendorSeverity": {
+      "azure": 2,
+      "cbl-mariner": 2,
+      "ghsa": 1,
+      "nvd": 2,
+      "redhat": 2,
+      "ubuntu": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:L/A:L",
+       "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:N/VI:N/VA:N/SC:L/SI:L/SA:L",
+       "V3Score": 5,
+       "V40Score": 2.3
+      },
+      "nvd": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:L/I:L/A:N",
+       "V3Score": 4.7
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:L/A:L",
+       "V3Score": 5
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2024-43796",
+      "https://github.com/expressjs/express",
+      "https://github.com/expressjs/express/commit/54271f69b511fea198471e6ff3400ab805d6b553",
+      "https://github.com/expressjs/express/security/advisories/GHSA-qw6h-vgh9-j6wx",
+      "https://nvd.nist.gov/vuln/detail/CVE-2024-43796",
+      "https://ubuntu.com/security/notices/USN-7581-1",
+      "https://www.cve.org/CVERecord?id=CVE-2024-43796"
+     ],
+     "PublishedDate": "2024-09-10T15:15:17.51Z",
+     "LastModifiedDate": "2026-06-17T07:51:43.847Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2019-10744",
+     "VendorIDs": [
+      "GHSA-jf85-cpcp-j695"
+     ],
+     "PkgID": "lodash@4.17.11",
+     "PkgName": "lodash",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/lodash@4.17.11",
+      "UID": "7cb85437e767f21f"
+     },
+     "InstalledVersion": "4.17.11",
+     "FixedVersion": "4.17.12",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2019-10744",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory npm",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+     },
+     "Fingerprint": "sha256:7d18a6a21880c8dcb4301b53f15b06ecfc55cd96da88a856b96eb0a3dc0f0b75",
+     "Title": "nodejs-lodash: prototype pollution in defaultsDeep function leading to modifying properties",
+     "Description": "Versions of lodash lower than 4.17.12 are vulnerable to Prototype Pollution. The function defaultsDeep could be tricked into adding or modifying properties of Object.prototype using a constructor payload.",
+     "Severity": "CRITICAL",
+     "CweIDs": [
+      "CWE-1321"
+     ],
+     "VendorSeverity": {
+      "ghsa": 4,
+      "nvd": 4,
+      "redhat": 3,
+      "ruby-advisory-db": 4
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H",
+       "V3Score": 9.1
+      },
+      "nvd": {
+       "V2Vector": "AV:N/AC:L/Au:N/C:N/I:P/A:P",
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H",
+       "V2Score": 6.4,
+       "V3Score": 9.1
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H",
+       "V3Score": 9.1
+      }
+     },
+     "References": [
+      "https://access.redhat.com/errata/RHSA-2019:3024",
+      "https://access.redhat.com/security/cve/CVE-2019-10744",
+      "https://github.com/advisories/GHSA-jf85-cpcp-j695",
+      "https://github.com/lodash/lodash/pull/4336",
+      "https://github.com/rubysec/ruby-advisory-db/blob/master/gems/lodash-rails/CVE-2019-10744.yml",
+      "https://nvd.nist.gov/vuln/detail/CVE-2019-10744",
+      "https://security.netapp.com/advisory/ntap-20191004-0005",
+      "https://security.netapp.com/advisory/ntap-20191004-0005/",
+      "https://snyk.io/vuln/SNYK-JS-LODASH-450202",
+      "https://support.f5.com/csp/article/K47105354",
+      "https://support.f5.com/csp/article/K47105354?utm_source=f5support&amp%3Butm_medium=RSS",
+      "https://support.f5.com/csp/article/K47105354?utm_source=f5support&amp;utm_medium=RSS",
+      "https://www.cve.org/CVERecord?id=CVE-2019-10744",
+      "https://www.npmjs.com/advisories/1065",
+      "https://www.oracle.com/security-alerts/cpujan2021.html",
+      "https://www.oracle.com/security-alerts/cpuoct2020.html"
+     ],
+     "PublishedDate": "2019-07-26T00:15:11.217Z",
+     "LastModifiedDate": "2026-06-17T02:11:35.247Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2020-8203",
+     "VendorIDs": [
+      "GHSA-p6mc-m468-83gw"
+     ],
+     "PkgID": "lodash@4.17.11",
+     "PkgName": "lodash",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/lodash@4.17.11",
+      "UID": "7cb85437e767f21f"
+     },
+     "InstalledVersion": "4.17.11",
+     "FixedVersion": "4.17.19",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2020-8203",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory npm",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+     },
+     "Fingerprint": "sha256:b745de5458f2bae3f64eb725cfb6d26abef8943a775d0e32e958ec05252bdb44",
+     "Title": "nodejs-lodash: prototype pollution in zipObjectDeep function",
+     "Description": "Prototype pollution attack when using _.zipObjectDeep in lodash before 4.17.20.",
+     "Severity": "HIGH",
+     "CweIDs": [
+      "CWE-770",
+      "CWE-1321"
+     ],
+     "VendorSeverity": {
+      "ghsa": 3,
+      "nvd": 3,
+      "redhat": 2,
+      "ruby-advisory-db": 3,
+      "ubuntu": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:H",
+       "V3Score": 7.4
+      },
+      "nvd": {
+       "V2Vector": "AV:N/AC:M/Au:N/C:N/I:P/A:P",
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:H",
+       "V2Score": 5.8,
+       "V3Score": 7.4
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:H",
+       "V3Score": 7.4
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2020-8203",
+      "https://github.com/advisories/GHSA-p6mc-m468-83gw",
+      "https://github.com/github/advisory-database/pull/2884",
+      "https://github.com/lodash/lodash",
+      "https://github.com/lodash/lodash/commit/c84fe82760fb2d3e03a63379b297a1cc1a2fce12",
+      "https://github.com/lodash/lodash/issues/4744",
+      "https://github.com/lodash/lodash/issues/4874",
+      "https://github.com/lodash/lodash/wiki/Changelog#v41719",
+      "https://github.com/rubysec/ruby-advisory-db/blob/master/gems/lodash-rails/CVE-2020-8203.yml",
+      "https://hackerone.com/reports/712065",
+      "https://hackerone.com/reports/864701",
+      "https://nvd.nist.gov/vuln/detail/CVE-2020-8203",
+      "https://security.netapp.com/advisory/ntap-20200724-0006",
+      "https://security.netapp.com/advisory/ntap-20200724-0006/",
+      "https://ubuntu.com/security/notices/USN-8411-1",
+      "https://web.archive.org/web/20210914001339/https://github.com/lodash/lodash/issues/4744",
+      "https://www.cve.org/CVERecord?id=CVE-2020-8203",
+      "https://www.npmjs.com/advisories/1523",
+      "https://www.oracle.com//security-alerts/cpujul2021.html",
+      "https://www.oracle.com/security-alerts/cpuApr2021.html",
+      "https://www.oracle.com/security-alerts/cpuapr2022.html",
+      "https://www.oracle.com/security-alerts/cpujan2022.html",
+      "https://www.oracle.com/security-alerts/cpuoct2021.html"
+     ],
+     "PublishedDate": "2020-07-15T17:15:11.797Z",
+     "LastModifiedDate": "2026-11-02T18:18:29.9Z"
+    }
+   ]
+  },
+  {
+   "Target": "requirements.txt",
+   "Class": "lang-pkgs",
+   "Type": "pip",
+   "Packages": [
+    {
+     "Name": "django",
+     "Identifier": {
+      "PURL": "pkg:pypi/django@2.2.0",
+      "UID": "84b8af1d014e6c1d"
+     },
+     "Version": "2.2.0",
+     "Locations": [
+      {
+       "StartLine": 4,
+       "EndLine": 4
+      }
+     ],
+     "AnalyzedBy": "pip"
+    },
+    {
+     "Name": "flask",
+     "Identifier": {
+      "PURL": "pkg:pypi/flask@0.12.2",
+      "UID": "8144ea1e22487612"
+     },
+     "Version": "0.12.2",
+     "Locations": [
+      {
+       "StartLine": 1,
+       "EndLine": 1
+      }
+     ],
+     "AnalyzedBy": "pip"
+    },
+    {
+     "Name": "pyyaml",
+     "Identifier": {
+      "PURL": "pkg:pypi/pyyaml@5.3",
+      "UID": "60de057893a1c33f"
+     },
+     "Version": "5.3",
+     "Locations": [
+      {
+       "StartLine": 2,
+       "EndLine": 2
+      }
+     ],
+     "AnalyzedBy": "pip"
+    },
+    {
+     "Name": "requests",
+     "Identifier": {
+      "PURL": "pkg:pypi/requests@2.19.1",
+      "UID": "ed24f54dab74c5cb"
+     },
+     "Version": "2.19.1",
+     "Locations": [
+      {
+       "StartLine": 3,
+       "EndLine": 3
+      }
+     ],
+     "AnalyzedBy": "pip"
+    }
+   ],
+   "Vulnerabilities": [
+    {
+     "VulnerabilityID": "CVE-2019-14234",
+     "VendorIDs": [
+      "GHSA-6r97-cj55-9hrq"
+     ],
+     "PkgName": "django",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/django@2.2.0",
+      "UID": "84b8af1d014e6c1d"
+     },
+     "InstalledVersion": "2.2.0",
+     "FixedVersion": "1.11.23, 2.1.11, 2.2.4",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2019-14234",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:398eee643b5b41387a6093cbd1fa9d4807e9a8abca7e0546facebc9fb590396e",
+     "Title": "Django: SQL injection possibility in key and index lookups for JSONField/HStoreField",
+     "Description": "An issue was discovered in Django 1.11.x before 1.11.23, 2.1.x before 2.1.11, and 2.2.x before 2.2.4. Due to an error in shallow key transformation, key and index lookups for django.contrib.postgres.fields.JSONField, and key lookups for django.contrib.postgres.fields.HStoreField, were subject to SQL injection. This could, for example, be exploited via crafted use of \"OR 1=1\" in a key or index name to return all records, using a suitably crafted dictionary, with dictionary expansion, as the **kwargs passed to the QuerySet.filter() function.",
+     "Severity": "CRITICAL",
+     "CweIDs": [
+      "CWE-89"
+     ],
+     "VendorSeverity": {
+      "ghsa": 4,
+      "nvd": 4,
+      "redhat": 2,
+      "ubuntu": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+       "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+       "V3Score": 9.8,
+       "V40Score": 9.3
+      },
+      "nvd": {
+       "V2Vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+       "V3Vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+       "V2Score": 7.5,
+       "V3Score": 9.8
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+       "V3Score": 5.3
+      }
+     },
+     "References": [
+      "http://lists.opensuse.org/opensuse-security-announce/2019-08/msg00025.html",
+      "https://access.redhat.com/security/cve/CVE-2019-14234",
+      "https://docs.djangoproject.com/en/dev/releases/security",
+      "https://docs.djangoproject.com/en/dev/releases/security/",
+      "https://github.com/advisories/GHSA-6r97-cj55-9hrq",
+      "https://github.com/django/django",
+      "https://github.com/django/django/commit/4f5b58f5cd3c57fee9972ab074f8dc6895d8f387",
+      "https://github.com/django/django/commit/ed682a24fca774818542757651bfba576c3fc3ef",
+      "https://github.com/django/django/commit/f74b3ae3628c26e1b4f8db3d13a91d52a833a975",
+      "https://github.com/pypa/advisory-database/tree/main/vulns/django/PYSEC-2019-13.yaml",
+      "https://groups.google.com/forum/#!topic/django-announce/jIoju2-KLDs",
+      "https://groups.google.com/forum/#%21topic/django-announce/jIoju2-KLDs",
+      "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/STVX7X7IDWAH5SKE6MBMY3TEI6ZODBTK",
+      "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/STVX7X7IDWAH5SKE6MBMY3TEI6ZODBTK/",
+      "https://nvd.nist.gov/vuln/detail/CVE-2019-14234",
+      "https://seclists.org/bugtraq/2019/Aug/15",
+      "https://security.gentoo.org/glsa/202004-17",
+      "https://security.netapp.com/advisory/ntap-20190828-0002",
+      "https://security.netapp.com/advisory/ntap-20190828-0002/",
+      "https://ubuntu.com/security/notices/USN-4084-1",
+      "https://www.cve.org/CVERecord?id=CVE-2019-14234",
+      "https://www.debian.org/security/2019/dsa-4498",
+      "https://www.djangoproject.com/weblog/2019/aug/01/security-releases",
+      "https://www.djangoproject.com/weblog/2019/aug/01/security-releases/"
+     ],
+     "PublishedDate": "2019-08-09T13:15:11.777Z",
+     "LastModifiedDate": "2026-06-17T02:18:00.427Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2019-19844",
+     "VendorIDs": [
+      "GHSA-vfq6-hq5r-27r6"
+     ],
+     "PkgName": "django",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/django@2.2.0",
+      "UID": "84b8af1d014e6c1d"
+     },
+     "InstalledVersion": "2.2.0",
+     "FixedVersion": "1.11.27, 2.2.9, 3.0.1",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2019-19844",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:94692e91da6d0539c8abd71e0249c17e2844c724f287bf9e9f0c339c9176a089",
+     "Title": "Django: crafted email address allows account takeover",
+     "Description": "Django before 1.11.27, 2.x before 2.2.9, and 3.x before 3.0.1 allows account takeover. A suitably crafted email address (that is equal to an existing user's email address after case transformation of Unicode characters) would allow an attacker to be sent a password reset token for the matched user account. (One mitigation in the new releases is to send password reset tokens only to the registered user email address.)",
+     "Severity": "CRITICAL",
+     "CweIDs": [
+      "CWE-640"
+     ],
+     "VendorSeverity": {
+      "ghsa": 4,
+      "nvd": 4,
+      "redhat": 4,
+      "ubuntu": 3
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+       "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+       "V3Score": 9.8,
+       "V40Score": 9.3
+      },
+      "nvd": {
+       "V2Vector": "AV:N/AC:L/Au:N/C:N/I:P/A:N",
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+       "V2Score": 5,
+       "V3Score": 9.8
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+       "V3Score": 9.8
+      }
+     },
+     "References": [
+      "http://packetstormsecurity.com/files/155872/Django-Account-Hijack.html",
+      "https://access.redhat.com/security/cve/CVE-2019-19844",
+      "https://docs.djangoproject.com/en/dev/releases/security",
+      "https://docs.djangoproject.com/en/dev/releases/security/",
+      "https://github.com/advisories/GHSA-vfq6-hq5r-27r6",
+      "https://github.com/django/django",
+      "https://github.com/django/django/commit/302a4ff1e8b1c798aab97673909c7a3dfda42c26",
+      "https://github.com/django/django/commit/4d334bea06cac63dc1272abcec545b85136cca0e",
+      "https://github.com/django/django/commit/5b1fbcef7a8bec991ebe7b2a18b5d5a95d72cb70",
+      "https://github.com/django/django/commit/f4cff43bf921fcea6a29b726eb66767f67753fa2",
+      "https://github.com/pypa/advisory-database/tree/main/vulns/django/PYSEC-2019-16.yaml",
+      "https://groups.google.com/forum/#!topic/django-announce/3oaB2rVH3a0",
+      "https://groups.google.com/forum/#%21topic/django-announce/3oaB2rVH3a0",
+      "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/HCM2DPUI7TOZWN4A6JFQFUVQ2XGE7GUD",
+      "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/HCM2DPUI7TOZWN4A6JFQFUVQ2XGE7GUD/",
+      "https://nvd.nist.gov/vuln/detail/CVE-2019-19844",
+      "https://seclists.org/bugtraq/2020/Jan/9",
+      "https://security.gentoo.org/glsa/202004-17",
+      "https://security.netapp.com/advisory/ntap-20200110-0003",
+      "https://security.netapp.com/advisory/ntap-20200110-0003/",
+      "https://ubuntu.com/security/notices/USN-4224-1",
+      "https://ubuntu.com/security/notices/USN-6722-1",
+      "https://usn.ubuntu.com/4224-1",
+      "https://usn.ubuntu.com/4224-1/",
+      "https://www.cve.org/CVERecord?id=CVE-2019-19844",
+      "https://www.debian.org/security/2020/dsa-4598",
+      "https://www.djangoproject.com/weblog/2019/dec/18/security-releases",
+      "https://www.djangoproject.com/weblog/2019/dec/18/security-releases/"
+     ],
+     "PublishedDate": "2019-12-18T19:15:11.78Z",
+     "LastModifiedDate": "2026-06-17T02:27:20.267Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2020-7471",
+     "VendorIDs": [
+      "GHSA-hmr4-m2h5-33qx"
+     ],
+     "PkgName": "django",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/django@2.2.0",
+      "UID": "84b8af1d014e6c1d"
+     },
+     "InstalledVersion": "2.2.0",
+     "FixedVersion": "1.11.28, 2.2.10, 3.0.3",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2020-7471",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:bfc8a946311cb998540fab1a8bea2e000422a13a3492e97614c953e054949ba5",
+     "Title": "django: potential SQL injection via StringAgg(delimiter)",
+     "Description": "Django 1.11 before 1.11.28, 2.2 before 2.2.10, and 3.0 before 3.0.3 allows SQL Injection if untrusted data is used as a StringAgg delimiter (e.g., in Django applications that offer downloads of data as a series of rows with a user-specified column delimiter). By passing a suitably crafted delimiter to a contrib.postgres.aggregates.StringAgg instance, it was possible to break escaping and inject malicious SQL.",
+     "Severity": "CRITICAL",
+     "CweIDs": [
+      "CWE-89"
+     ],
+     "VendorSeverity": {
+      "bitnami": 4,
+      "ghsa": 4,
+      "nvd": 4,
+      "redhat": 3,
+      "ubuntu": 2
+     },
+     "CVSS": {
+      "bitnami": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+       "V3Score": 9.8
+      },
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+       "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+       "V3Score": 9.8,
+       "V40Score": 9.3
+      },
+      "nvd": {
+       "V2Vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+       "V2Score": 7.5,
+       "V3Score": 9.8
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+       "V3Score": 9.8
+      }
+     },
+     "References": [
+      "http://www.openwall.com/lists/oss-security/2020/02/03/1",
+      "https://access.redhat.com/security/cve/CVE-2020-7471",
+      "https://docs.djangoproject.com/en/3.0/releases/security",
+      "https://docs.djangoproject.com/en/3.0/releases/security/",
+      "https://github.com/advisories/GHSA-hmr4-m2h5-33qx",
+      "https://github.com/django/django",
+      "https://github.com/django/django/commit/001b0634cd309e372edb6d7d95d083d02b8e37bd",
+      "https://github.com/django/django/commit/505826b469b16ab36693360da9e11fd13213421b",
+      "https://github.com/django/django/commit/c67a368c16e4680b324b4f385398d638db4d8147",
+      "https://github.com/django/django/commit/eb31d845323618d688ad429479c6dda973056136",
+      "https://github.com/pypa/advisory-database/tree/main/vulns/django/PYSEC-2020-35.yaml",
+      "https://groups.google.com/forum/#!topic/django-announce/X45S86X5bZI",
+      "https://groups.google.com/forum/#%21topic/django-announce/X45S86X5bZI",
+      "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/4A2AP4T7RKPBCLTI2NNQG3T6MINDUUMZ",
+      "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/4A2AP4T7RKPBCLTI2NNQG3T6MINDUUMZ/",
+      "https://nvd.nist.gov/vuln/detail/CVE-2020-7471",
+      "https://seclists.org/bugtraq/2020/Feb/30",
+      "https://security.gentoo.org/glsa/202004-17",
+      "https://security.netapp.com/advisory/ntap-20200221-0006",
+      "https://security.netapp.com/advisory/ntap-20200221-0006/",
+      "https://ubuntu.com/security/notices/USN-4264-1",
+      "https://usn.ubuntu.com/4264-1",
+      "https://usn.ubuntu.com/4264-1/",
+      "https://www.cve.org/CVERecord?id=CVE-2020-7471",
+      "https://www.debian.org/security/2020/dsa-4629",
+      "https://www.djangoproject.com/weblog/2020/feb/03/security-releases",
+      "https://www.djangoproject.com/weblog/2020/feb/03/security-releases/",
+      "https://www.openwall.com/lists/oss-security/2020/02/03/1"
+     ],
+     "PublishedDate": "2020-02-03T12:15:26.993Z",
+     "LastModifiedDate": "2026-06-17T03:24:50.777Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2022-28346",
+     "VendorIDs": [
+      "GHSA-2gwj-7jmv-h26r"
+     ],
+     "PkgName": "django",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/django@2.2.0",
+      "UID": "84b8af1d014e6c1d"
+     },
+     "InstalledVersion": "2.2.0",
+     "FixedVersion": "2.2.28, 3.2.13, 4.0.4",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2022-28346",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:77fb593330df8330192be9f4399741a6725a6e18b9149e278b36ef65c8b62049",
+     "Title": "Django: SQL injection in QuerySet.annotate(),aggregate() and extra()",
+     "Description": "An issue was discovered in Django 2.2 before 2.2.28, 3.2 before 3.2.13, and 4.0 before 4.0.4. QuerySet.annotate(), aggregate(), and extra() methods are subject to SQL injection in column aliases via a crafted dictionary (with dictionary expansion) as the passed **kwargs.",
+     "Severity": "CRITICAL",
+     "CweIDs": [
+      "CWE-89"
+     ],
+     "VendorSeverity": {
+      "bitnami": 4,
+      "ghsa": 4,
+      "nvd": 4,
+      "redhat": 3,
+      "ubuntu": 3
+     },
+     "CVSS": {
+      "bitnami": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+       "V3Score": 9.8
+      },
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+       "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+       "V3Score": 9.8,
+       "V40Score": 9.3
+      },
+      "nvd": {
+       "V2Vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+       "V2Score": 7.5,
+       "V3Score": 9.8
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:L",
+       "V3Score": 9.4
+      }
+     },
+     "References": [
+      "http://www.openwall.com/lists/oss-security/2022/04/11/1",
+      "https://access.redhat.com/security/cve/CVE-2022-28346",
+      "https://docs.djangoproject.com/en/4.0/releases/security",
+      "https://docs.djangoproject.com/en/4.0/releases/security/",
+      "https://github.com/advisories/GHSA-2gwj-7jmv-h26r",
+      "https://github.com/django/django",
+      "https://github.com/django/django/commit/2044dac5c6968441be6f534c4139bcf48c5c7e48",
+      "https://github.com/django/django/commit/2c09e68ec911919360d5f8502cefc312f9e03c5d",
+      "https://github.com/django/django/commit/800828887a0509ad1162d6d407e94d8de7eafc60",
+      "https://github.com/django/django/commit/93cae5cb2f9a4ef1514cf1a41f714fef08005200",
+      "https://github.com/pypa/advisory-database/tree/main/vulns/django/PYSEC-2022-190.yaml",
+      "https://groups.google.com/forum/#!forum/django-announce",
+      "https://groups.google.com/forum/#%21forum/django-announce",
+      "https://lists.debian.org/debian-lts-announce/2022/04/msg00013.html",
+      "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/HWY6DQWRVBALV73BPUVBXC3QIYUM24IK",
+      "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/HWY6DQWRVBALV73BPUVBXC3QIYUM24IK/",
+      "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/LTZVAKU5ALQWOKFTPISE257VCVIYGFQI",
+      "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/LTZVAKU5ALQWOKFTPISE257VCVIYGFQI/",
+      "https://nvd.nist.gov/vuln/detail/CVE-2022-28346",
+      "https://security.netapp.com/advisory/ntap-20220609-0002",
+      "https://security.netapp.com/advisory/ntap-20220609-0002/",
+      "https://ubuntu.com/security/notices/USN-5373-1",
+      "https://ubuntu.com/security/notices/USN-5373-2",
+      "https://www.cve.org/CVERecord?id=CVE-2022-28346",
+      "https://www.debian.org/security/2022/dsa-5254",
+      "https://www.djangoproject.com/weblog/2022/apr/11/security-releases",
+      "https://www.djangoproject.com/weblog/2022/apr/11/security-releases/"
+     ],
+     "PublishedDate": "2022-04-12T05:15:06.927Z",
+     "LastModifiedDate": "2026-06-17T04:38:24.5Z"
+    }
+   ]
+  },
+  {
+   "Target": "Dockerfile",
+   "Class": "config",
+   "Type": "dockerfile",
+   "MisconfSummary": {
+    "Successes": 24,
+    "Failures": 3
+   },
+   "Misconfigurations": [
+    {
+     "Type": "Dockerfile Security Check",
+     "ID": "DS-0002",
+     "Title": "Image user should not be 'root'",
+     "Description": "Running containers with 'root' user can lead to a container escape situation. It is a best practice to run containers as non-root users, which can be done by adding a 'USER' statement to the Dockerfile.",
+     "Message": "Last USER command in Dockerfile should not be 'root'",
+     "Namespace": "builtin.dockerfile.DS002",
+     "Query": "data.builtin.dockerfile.DS002.deny",
+     "Resolution": "Add 'USER <non root user name>' line to the Dockerfile",
+     "Severity": "HIGH",
+     "PrimaryURL": "https://avd.aquasec.com/misconfig/ds-0002",
+     "References": [
+      "https://docs.docker.com/develop/develop-images/dockerfile_best-practices/",
+      "https://avd.aquasec.com/misconfig/ds-0002"
+     ],
+     "Status": "FAIL",
+     "CauseMetadata": {
+      "Provider": "Dockerfile",
+      "Service": "general",
+      "StartLine": 2,
+      "EndLine": 2,
+      "Code": {
+       "Lines": [
+        {
+         "Number": 2,
+         "Content": "USER root",
+         "IsCause": true,
+         "Annotation": "",
+         "Truncated": false,
+         "Highlighted": "\u001b[38;5;64mUSER\u001b[0m\u001b[38;5;37m root\u001b[0m",
+         "FirstCause": true,
+         "LastCause": true
+        }
+       ]
+      }
+     }
+    },
+    {
+     "Type": "Dockerfile Security Check",
+     "ID": "DS-0005",
+     "Title": "ADD instead of COPY",
+     "Description": "You should use COPY instead of ADD unless you want to extract a tar file. Note that an ADD command will extract a tar file, which adds the risk of Zip-based vulnerabilities. Accordingly, it is advised to use a COPY command, which does not extract tar files.",
+     "Message": "Consider using 'COPY . /app' command instead of 'ADD . /app'",
+     "Namespace": "builtin.dockerfile.DS005",
+     "Query": "data.builtin.dockerfile.DS005.deny",
+     "Resolution": "Use COPY instead of ADD",
+     "Severity": "LOW",
+     "PrimaryURL": "https://avd.aquasec.com/misconfig/ds-0005",
+     "References": [
+      "https://docs.docker.com/engine/reference/builder/#add",
+      "https://avd.aquasec.com/misconfig/ds-0005"
+     ],
+     "Status": "FAIL",
+     "CauseMetadata": {
+      "Provider": "Dockerfile",
+      "Service": "general",
+      "StartLine": 3,
+      "EndLine": 3,
+      "Code": {
+       "Lines": [
+        {
+         "Number": 3,
+         "Content": "ADD . /app",
+         "IsCause": true,
+         "Annotation": "",
+         "Truncated": false,
+         "Highlighted": "\u001b[38;5;64mADD\u001b[0m . /app",
+         "FirstCause": true,
+         "LastCause": true
+        }
+       ]
+      }
+     }
+    },
+    {
+     "Type": "Dockerfile Security Check",
+     "ID": "DS-0026",
+     "Title": "No HEALTHCHECK defined",
+     "Description": "You should add HEALTHCHECK instruction in your docker container images to perform the health check on running containers.",
+     "Message": "Add HEALTHCHECK instruction in your Dockerfile",
+     "Namespace": "builtin.dockerfile.DS026",
+     "Query": "data.builtin.dockerfile.DS026.deny",
+     "Resolution": "Add HEALTHCHECK instruction in Dockerfile",
+     "Severity": "LOW",
+     "PrimaryURL": "https://avd.aquasec.com/misconfig/ds-0026",
+     "References": [
+      "https://blog.aquasec.com/docker-security-best-practices",
+      "https://avd.aquasec.com/misconfig/ds-0026"
+     ],
+     "Status": "FAIL",
+     "CauseMetadata": {
+      "Provider": "Dockerfile",
+      "Service": "general"
+     }
+    }
+   ]
+  }
+ ]
+}
