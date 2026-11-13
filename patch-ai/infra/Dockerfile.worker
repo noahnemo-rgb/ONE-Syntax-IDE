@@ -15,6 +15,10 @@ COPY workers/scanner/patchai_worker ./patchai_worker
 COPY workers/scanner/rules ./rules
 RUN pip install --no-cache-dir .
 
+# Build context for the sandbox image, built by the worker's own dockerd on first boot.
+COPY infra/Dockerfile.scanner-tools /app/scanner-tools/infra/Dockerfile.scanner-tools
+COPY infra/install-scanners.sh /app/scanner-tools/infra/install-scanners.sh
+
 COPY infra/worker-entrypoint.sh /usr/local/bin/worker-entrypoint.sh
 COPY infra/egress-firewall.sh /usr/local/bin/egress-firewall.sh
 

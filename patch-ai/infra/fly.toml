@@ -1,0 +1,34 @@
+# Scan worker on Fly.io. Deploy from the patch-ai/ directory:
+#   fly deploy . --config infra/fly.toml
+# The worker exposes no ports; it only polls Postgres.
+app = "patchai-worker"
+primary_region = "iad"
+kill_signal = "SIGTERM"
+kill_timeout = 300
+
+[build]
+  dockerfile = "Dockerfile.worker"
+
+[env]
+  SANDBOX_MODE = "docker"
+  WORKER_KINDS = "code,web"
+  EGRESS_NETWORK = "patchai-egress"
+  WEB_RATE_LIMIT = "10"
+  TOOL_TIMEOUT = "600"
+  WEB_SCAN_TIMEOUT = "1800"
+  AI_GATEWAY_MODEL = "anthropic/claude-haiku-5.5"
+
+# Docker images, vulnerability databases and scan scratch space.
+[[mounts]]
+  source = "patchai_data"
+  destination = "/data"
+  initial_size = "40gb"
+
+[[vm]]
+  size = "performance-2x"
+  memory = "8gb"
+
+# Secrets (set with `fly secrets set`):
+#   DATABASE_URL, GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY, AI_GATEWAY_API_KEY
+# Allocate a static egress IP so the security page can publish it:
+#   fly machine egress-ip allocate <machine-id>

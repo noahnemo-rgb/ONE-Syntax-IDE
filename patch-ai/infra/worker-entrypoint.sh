@@ -19,8 +19,12 @@ if ! docker network inspect "${EGRESS_NETWORK:-patchai-egress}" >/dev/null 2>&1;
 fi
 /usr/local/bin/egress-firewall.sh
 
-docker image inspect "${SCANNER_IMAGE:-patchai/scanner-tools:latest}" >/dev/null 2>&1 \
-  || docker pull "${SCANNER_IMAGE:-patchai/scanner-tools:latest}"
+SCANNER_IMAGE="${SCANNER_IMAGE:-patchai/scanner-tools:latest}"
+if ! docker image inspect "$SCANNER_IMAGE" >/dev/null 2>&1; then
+  docker pull "$SCANNER_IMAGE" 2>/dev/null \
+    || docker build -t "$SCANNER_IMAGE" -f /app/scanner-tools/infra/Dockerfile.scanner-tools /app/scanner-tools
+fi
+export SCANNER_IMAGE
 if [[ "${WORKER_KINDS:-code,web}" == *web* ]]; then
   docker image inspect "${ZAP_IMAGE:-ghcr.io/zaproxy/zaproxy:stable}" >/dev/null 2>&1 \
     || docker pull "${ZAP_IMAGE:-ghcr.io/zaproxy/zaproxy:stable}"
