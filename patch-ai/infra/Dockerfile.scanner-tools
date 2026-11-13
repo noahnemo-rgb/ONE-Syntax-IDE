@@ -1,0 +1,16 @@
+# Image used for every sandboxed tool run (one throwaway container per tool).
+# It contains the scanners only: no worker code, no credentials.
+FROM python:3.12-slim
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates curl \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY infra/install-scanners.sh /tmp/install-scanners.sh
+RUN DEST=/usr/local/bin /tmp/install-scanners.sh && rm /tmp/install-scanners.sh \
+ && pip install --no-cache-dir "bandit>=1.8,<2"
+
+# Containers run as nobody with a read-only root filesystem; HOME must be writable tmpfs.
+ENV HOME=/tmp
+USER 65534:65534
+WORKDIR /tmp

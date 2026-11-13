@@ -1,0 +1,26 @@
+# The scan worker. It runs its own Docker daemon inside the Fly Machine (a
+# Firecracker VM) and starts one throwaway container per tool run.
+FROM python:3.12-slim
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates curl docker.io iptables \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY infra/install-scanners.sh /tmp/install-scanners.sh
+RUN DEST=/usr/local/bin /tmp/install-scanners.sh && rm /tmp/install-scanners.sh
+
+WORKDIR /app
+COPY workers/scanner/pyproject.toml ./
+COPY workers/scanner/patchai_worker ./patchai_worker
+COPY workers/scanner/rules ./rules
+RUN pip install --no-cache-dir .
+
+COPY infra/worker-entrypoint.sh /usr/local/bin/worker-entrypoint.sh
+COPY infra/egress-firewall.sh /usr/local/bin/egress-firewall.sh
+
+ENV SANDBOX_MODE=docker \
+    RULES_DIR=/app/rules \
+    VULNDB_DIR=/data/vulndb \
+    WORK_DIR=/data/work
+
+ENTRYPOINT ["/usr/local/bin/worker-entrypoint.sh"]

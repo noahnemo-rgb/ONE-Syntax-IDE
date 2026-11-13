@@ -45,16 +45,16 @@ export async function assertWithinLimit(orgId: string, plan: Plan, key: LimitKey
   }[key];
   const limit = limits[key];
   if (used >= limit) {
-    const what = {
-      repos: "repositories",
-      liveTargets: "live targets",
-      seats: "seats",
-      scansPerMonth: "scans this month",
+    const [one, many] = {
+      repos: ["repository", "repositories"],
+      liveTargets: ["live target", "live targets"],
+      seats: ["seat", "seats"],
+      scansPerMonth: ["scan per month", "scans per month"],
     }[key];
     throw new LimitError(
       limit === 0
-        ? `The ${limits.label} plan does not include ${what}. Upgrade to continue.`
-        : `The ${limits.label} plan allows ${limit} ${what}. Upgrade to continue.`,
+        ? `The ${limits.label} plan does not include ${many}. Upgrade to continue.`
+        : `The ${limits.label} plan allows ${limit} ${limit === 1 ? one : many}. Upgrade to continue.`,
     );
   }
 }
