@@ -122,7 +122,11 @@ export async function safeFetchText(
         method: "GET",
         timeout: timeoutMs,
         headers: { "user-agent": VERIFIER_USER_AGENT },
-        lookup: (_host, _opts, cb) => cb(null, address, isIP(address)),
+        // Node may request every address (`all: true`, used for happy eyeballs).
+        lookup: ((_host: string, opts: { all?: boolean }, cb: (...args: unknown[]) => void) =>
+          opts?.all
+            ? cb(null, [{ address, family: isIP(address) }])
+            : cb(null, address, isIP(address))) as never,
       },
       (res) => {
         let size = 0;
