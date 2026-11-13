@@ -45,6 +45,37 @@ body {
 .prose-legal strong {
   @apply text-foreground;
 }
+.prose-legal h3 {
+  @apply text-lg font-semibold mt-6 mb-2;
+}
+.prose-legal p {
+  @apply my-3;
+}
+.prose-legal ol {
+  @apply list-decimal pl-6 space-y-1;
+}
+.prose-legal a {
+  @apply text-accent underline underline-offset-2;
+}
+.prose-legal code {
+  @apply rounded bg-surface-2 px-1 py-0.5 font-mono text-sm text-foreground;
+}
+.prose-legal blockquote {
+  @apply my-6 rounded-md border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-100;
+}
+.prose-legal table {
+  @apply my-4 w-full border-collapse text-sm;
+}
+.prose-legal th,
+.prose-legal td {
+  @apply border border-border px-3 py-2 text-left align-top;
+}
+.prose-legal th {
+  @apply bg-surface-2 font-medium;
+}
+.prose-legal td {
+  @apply text-muted;
+}
 
 @media print {
   :root {

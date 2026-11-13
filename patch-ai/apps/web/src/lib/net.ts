@@ -1,6 +1,7 @@
 import { lookup } from "node:dns/promises";
 import { request as httpsRequest } from "node:https";
 import { BlockList, isIP } from "node:net";
+import { VERIFIER_USER_AGENT } from "./scanner-identity";
 
 const blocked = new BlockList();
 // IPv4 ranges that must never be scanned or fetched: private, loopback,
@@ -119,7 +120,7 @@ export async function safeFetchText(
         path,
         method: "GET",
         timeout: timeoutMs,
-        headers: { "user-agent": "PatchAI-Verifier/1.0 (+https://patch.ai/security)" },
+        headers: { "user-agent": VERIFIER_USER_AGENT },
         lookup: (_host, _opts, cb) => cb(null, address, isIP(address)),
       },
       (res) => {
