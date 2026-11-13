@@ -343,6 +343,97 @@ def parse_trivy(data: dict, root: str = SANDBOX_ROOT) -> list[Finding]:
 # Merge
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Live-target tools
+# ---------------------------------------------------------------------------
+
+_HTML_TAG = re.compile(r"<[^>]+>")
+
+
+def parse_nuclei_jsonl(text: str) -> list[Finding]:
+    out: list[Finding] = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        info = item.get("info") or {}
+        severity = str(info.get("severity", "info")).lower()
+        if severity not in SEVERITIES:
+            severity = "info"
+        classification = info.get("classification") or {}
+        cwe = _cwe(classification.get("cwe-id"))
+        tags = info.get("tags") or []
+        if isinstance(tags, str):
+            tags = tags.split(",")
+        if not cwe and "exposure" in tags:
+            # Lets file-exposure templates merge with the passive check for the same URL.
+            cwe = "CWE-538"
+        extracted = item.get("extracted-results") or []
+        description = (info.get("description") or "").strip()
+        if info.get("remediation"):
+            description += f"\n\nRemediation: {info['remediation'].strip()}"
+        out.append(
+            Finding(
+                tool="nuclei",
+                rule_id=f"nuclei/{item.get('template-id', 'unknown')}",
+                title=info.get("name") or item.get("template-id", "Nuclei finding"),
+                severity=severity,
+                category="web",
+                description=description or None,
+                cwe=cwe,
+                url=item.get("matched-at") or item.get("url") or item.get("host"),
+                evidence=_clip("\n".join(str(e) for e in extracted[:5])) if extracted else item.get("matcher-name"),
+            )
+        )
+    return out
+
+
+_ZAP_RISK = {"0": "info", "1": "low", "2": "medium", "3": "high"}
+
+
+def parse_zap(data: dict) -> list[Finding]:
+    out: list[Finding] = []
+    for site in data.get("site") or []:
+        for alert in site.get("alerts") or []:
+            severity = _ZAP_RISK.get(str(alert.get("riskcode")), "info")
+            # ZAP marks unconfirmed results "Low" confidence (1) or "False Positive" (0).
+            if str(alert.get("confidence")) in {"0", "1"}:
+                severity = downgrade(severity)
+            if str(alert.get("confidence")) == "0":
+                continue
+            desc = _HTML_TAG.sub("", alert.get("desc") or "").strip()
+            solution = _HTML_TAG.sub("", alert.get("solution") or "").strip()
+            cwe = alert.get("cweid")
+            instances = alert.get("instances") or [{}]
+            for inst in instances[:20]:
+                evidence = "\n".join(
+                    p for p in (
+                        f"{inst.get('method', 'GET')} {inst.get('uri', '')}".strip(),
+                        f"param: {inst['param']}" if inst.get("param") else "",
+                        f"evidence: {inst['evidence']}" if inst.get("evidence") else "",
+                        f"attack: {inst['attack']}" if inst.get("attack") else "",
+                    ) if p
+                )
+                out.append(
+                    Finding(
+                        tool="zap",
+                        rule_id=f"zap/{alert.get('pluginid', 'unknown')}",
+                        title=alert.get("alert") or alert.get("name") or "ZAP alert",
+                        severity=severity,
+                        category="web",
+                        description=(desc + (f"\n\nSolution: {solution}" if solution else "")) or None,
+                        cwe=_cwe(cwe) if cwe and str(cwe) not in {"-1", "0"} else None,
+                        url=inst.get("uri") or site.get("@name"),
+                        evidence=_clip(evidence) or None,
+                    )
+                )
+    return out
+
+
 _TOOL_PREFERENCE = ["opengrep", "gitleaks", "osv-scanner", "trivy", "bandit", "zap", "nuclei", "patchai-passive"]
 
 

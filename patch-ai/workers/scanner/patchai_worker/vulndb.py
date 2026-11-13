@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import shutil
 import subprocess
+import tempfile
 import time
 from pathlib import Path
 
 import httpx
 
+NUCLEI_RELEASES = "https://api.github.com/repos/projectdiscovery/nuclei-templates/releases/latest"
 OSV_ECOSYSTEMS = ["PyPI", "npm", "Go", "Maven", "RubyGems", "crates.io", "Packagist", "NuGet", "Pub", "Hex"]
 OSV_BUCKET = "https://osv-vulnerabilities.storage.googleapis.com"
 STAMP = ".last-refresh"
@@ -56,4 +59,34 @@ def refresh(root: Path, log=print) -> None:
         capture_output=True,
     )
     log("trivy database refreshed")
+    refresh_nuclei_templates(root, log=log)
     (root / STAMP).touch()
+
+
+def nuclei_dir(root: Path) -> Path:
+    return root / "nuclei-templates"
+
+
+def refresh_nuclei_templates(root: Path, log=print) -> None:
+    """Installs the latest projectdiscovery/nuclei-templates release (MIT licensed)."""
+    release = httpx.get(NUCLEI_RELEASES, timeout=30, follow_redirects=True)
+    release.raise_for_status()
+    tag = release.json()["tag_name"]
+    dest = nuclei_dir(root)
+    if (dest / ".tag").exists() and (dest / ".tag").read_text().strip() == tag:
+        return
+    staging = root / "nuclei-templates.new"
+    shutil.rmtree(staging, ignore_errors=True)
+    staging.mkdir(parents=True)
+    with tempfile.NamedTemporaryFile(suffix=".tar.gz") as tmp:
+        url = f"https://github.com/projectdiscovery/nuclei-templates/archive/refs/tags/{tag}.tar.gz"
+        with httpx.stream("GET", url, timeout=300, follow_redirects=True) as res:
+            res.raise_for_status()
+            for chunk in res.iter_bytes():
+                tmp.write(chunk)
+        tmp.flush()
+        subprocess.run(["tar", "xzf", tmp.name, "-C", str(staging), "--strip-components=1"], check=True, timeout=300)
+    (staging / ".tag").write_text(tag)
+    shutil.rmtree(dest, ignore_errors=True)
+    staging.replace(dest)
+    log(f"nuclei templates refreshed: {tag}")

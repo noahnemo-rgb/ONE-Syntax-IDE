@@ -87,7 +87,7 @@ class Worker:
                 retention.run(self.db, log=log.info)
             except Exception:
                 log.exception("retention job failed")
-        if "code" in self.config.kinds and vulndb.needs_refresh(
+        if vulndb.needs_refresh(
             self.config.vulndb_dir, self.config.vulndb_refresh_hours
         ):
             try:

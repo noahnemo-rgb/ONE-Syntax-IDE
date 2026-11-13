@@ -90,9 +90,18 @@ class Sandbox:
         timeout: int | None = None,
         should_stop: Callable[[], bool] = lambda: False,
         log: Callable[[str], None] = lambda _: None,
+        user: str | None = "65534:65534",
+        out_mount: str = "/out",
+        extra_tmpfs: Sequence[str] = (),
     ) -> ToolResult:
-        """Runs one tool. `argv_template` may reference {src}, {out}, {vulndb} and {rules}."""
+        """Runs one tool. `argv_template` may reference {src}, {out}, {vulndb} and {rules}.
+
+        `user=None` keeps the image's own (non-root) user, and `out_mount` moves
+        the writable output directory, for images such as ZAP that expect them.
+        """
         paths = self.paths(mounts)
+        if self.config.sandbox == "docker":
+            paths["out"] = out_mount
         argv = [part.format(**paths) for part in argv_template]
         timeout = timeout or self.config.tool_timeout
         env = env or {}
@@ -105,11 +114,15 @@ class Sandbox:
                 "--read-only", "--tmpfs", "/tmp:rw,size=1g",
                 "--cap-drop", "ALL", "--security-opt", "no-new-privileges",
                 "--pids-limit", "512", "--memory", "2g", "--cpus", "1.5",
-                "--user", "65534:65534",
             ]
+            if user:
+                cmd += ["--user", user]
+            for path in extra_tmpfs:
+                cmd += ["--tmpfs", path]
             for key, host in mounts.host_paths().items():
+                target = out_mount if key == "out" else f"/{key}"
                 mode = "rw" if key == "out" else "ro"
-                cmd += ["-v", f"{host}:/{key}:{mode}"]
+                cmd += ["-v", f"{host}:{target}:{mode}"]
             for k, v in env.items():
                 cmd += ["-e", f"{k}={v}"]
             cmd += [image or self.config.scanner_image, *argv]
